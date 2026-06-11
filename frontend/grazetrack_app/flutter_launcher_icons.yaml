@@ -1,0 +1,19 @@
+# GrazeTrack launcher icon configuration
+# Docs: https://pub.dev/packages/flutter_launcher_icons
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/icons/app_icon.png"
+
+  # Android adaptive icon (Android 8.0+)
+  # Foreground is the cow image; background is solid green
+  adaptive_icon_background: "#1B5E20"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+
+  # Minimum Android SDK
+  min_sdk_android: 21
+
+  # Web — not needed
+  web:
+    generate: false

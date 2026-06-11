@@ -1,0 +1,288 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../providers/animal_provider.dart';
+import '../models/animal_model.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/app_utils.dart';
+import '../../../core/theme/app_theme.dart';
+
+class UpdateAnimalScreen extends ConsumerStatefulWidget {
+  final String animalId;
+  const UpdateAnimalScreen({super.key, required this.animalId});
+
+  @override
+  ConsumerState<UpdateAnimalScreen> createState() => _UpdateAnimalScreenState();
+}
+
+class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _breedController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _notesController = TextEditingController();
+
+  String _selectedType = AppConstants.animalTypes.first;
+  String _selectedGender = 'Male';
+  String _selectedStatus = 'active';
+  bool _isLoading = false;
+  bool _initialized = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _breedController.dispose();
+    _ageController.dispose();
+    _weightController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  void _initFromAnimal(AnimalModel animal) {
+    if (_initialized) return;
+    _initialized = true;
+    _nameController.text = animal.name;
+    _breedController.text = animal.breed;
+    _ageController.text = animal.age.toString();
+    _weightController.text = animal.weight > 0 ? animal.weight.toString() : '';
+    _notesController.text = animal.notes;
+    _selectedType = AppConstants.animalTypes.contains(animal.type)
+        ? animal.type
+        : AppConstants.animalTypes.first;
+    _selectedGender = (animal.gender == 'Female') ? 'Female' : 'Male';
+    _selectedStatus = animal.status;
+  }
+
+  Future<void> _submit(AnimalModel animal) async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    // purchaseCost is NOT included — it is fixed at the original value
+    final success = await ref.read(animalProvider.notifier).updateAnimal(
+      animal.id,
+      {
+        'name': _nameController.text.trim(),
+        'type': _selectedType,
+        'breed': _breedController.text.trim(),
+        'age': int.tryParse(_ageController.text) ?? animal.age,
+        'gender': _selectedGender,
+        'weight': double.tryParse(_weightController.text) ?? animal.weight,
+        'notes': _notesController.text.trim(),
+        'status': _selectedStatus,
+      },
+    );
+
+    setState(() => _isLoading = false);
+
+    if (mounted) {
+      if (success) {
+        AppUtils.showSnackBar(context, 'Animal updated successfully!');
+        context.pop();
+      } else {
+        AppUtils.showSnackBar(context, 'Failed to update animal',
+            isError: true);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(animalProvider);
+    AnimalModel? animal;
+    try {
+      animal = state.animals.firstWhere((a) => a.id == widget.animalId);
+    } catch (_) {}
+
+    if (animal == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Update Animal')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    _initFromAnimal(animal);
+
+    // Lock down the purchase cost to display only
+    final fixedCost = AppUtils.formatCurrency(animal.purchaseCost);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Update Animal')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ─── Purchase cost — read-only notice ──────────────────────
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline,
+                        size: 18, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Purchase Cost (fixed)',
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey)),
+                          Text(
+                            fixedCost,
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // ─── Animal Type ───────────────────────────────────────────
+              DropdownButtonFormField<String>(
+                initialValue: _selectedType,
+                decoration: const InputDecoration(
+                  labelText: 'Animal Type *',
+                  prefixIcon: Icon(Icons.pets),
+                ),
+                items: AppConstants.animalTypes
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedType = val!),
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Name / Tag ────────────────────────────────────────────
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name / Tag (optional)',
+                  prefixIcon: Icon(Icons.label_outline),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Breed ─────────────────────────────────────────────────
+              TextFormField(
+                controller: _breedController,
+                decoration: const InputDecoration(
+                  labelText: 'Breed',
+                  prefixIcon: Icon(Icons.category_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Gender ────────────────────────────────────────────────
+              DropdownButtonFormField<String>(
+                initialValue: _selectedGender,
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                  prefixIcon: Icon(Icons.transgender),
+                ),
+                items: ['Male', 'Female']
+                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedGender = val!),
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Status ────────────────────────────────────────────────
+              DropdownButtonFormField<String>(
+                initialValue: _selectedStatus,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  prefixIcon: Icon(Icons.info_outline),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'active', child: Text('Active')),
+                  DropdownMenuItem(value: 'sold', child: Text('Sold')),
+                  DropdownMenuItem(
+                      value: 'deceased', child: Text('Deceased')),
+                ],
+                onChanged: (val) => setState(() => _selectedStatus = val!),
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Age & Weight ──────────────────────────────────────────
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _ageController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Age (months)',
+                        prefixIcon:
+                            Icon(Icons.calendar_today_outlined),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _weightController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Weight (kg)',
+                        prefixIcon:
+                            Icon(Icons.monitor_weight_outlined),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // ─── Health Notes ──────────────────────────────────────────
+              TextFormField(
+                controller: _notesController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Health / Notes',
+                  hintText:
+                      'e.g. vaccinated, medication, health observations…',
+                  prefixIcon: Icon(Icons.health_and_safety_outlined),
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // ─── Save button ───────────────────────────────────────────
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: _isLoading ? null : () => _submit(animal!),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('Save Changes',
+                        style: TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
