@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GrazeTrack — System Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eef2ff', 100:'#e0e7ff', 200:'#c7d2fe', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 800:'#3730a3', 900:'#312e81' }
+          },
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes slideIn { from { transform:translateX(110%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    @keyframes fadeUp  { from { opacity:0; transform:translateY(8px) scale(.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .spin    { animation: spin    .75s linear infinite; }
+    .slide-in{ animation: slideIn .3s cubic-bezier(.16,1,.3,1); }
+    .fade-up { animation: fadeUp  .2s ease; }
+    .section { display:none; }
+    .section.active { display:block; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:9999px; }
+    canvas { max-height:220px !important; }
+  </style>
+</head>
+
+<body class="bg-slate-50 font-sans antialiased text-slate-800">
+
+<!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4"
+     style="background:linear-gradient(135deg,#312e81 0%,#4f46e5 45%,#7c3aed 100%)">
+
+  <!-- Decorative circles -->
+  <div class="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+  <div class="absolute bottom-0 right-0 w-72 h-72 bg-white/5 rounded-full translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
+
+  <div class="w-full max-w-md relative z-10">
+    <!-- Card -->
+    <div class="bg-white rounded-3xl shadow-2xl p-10">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <span class="text-3xl">🐄</span>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900">GrazeTrack</h1>
+        <p class="text-sm text-slate-500 mt-1">System Administration Portal</p>
+      </div>
+
+      <!-- Error -->
+      <div id="login-error" class="hidden mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium"></div>
+
+      <!-- Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Admin Email</label>
+          <input id="login-email" type="email" placeholder="admin@grazetrack.com" autocomplete="username"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition placeholder-slate-400" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+          <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition placeholder-slate-400" />
+        </div>
+        <button id="login-btn" onclick="doLogin()"
+          class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-sm shadow-brand-600/30 mt-2 flex items-center justify-center gap-2 disabled:opacity-60">
+          Sign in to Dashboard
+        </button>
+      </div>
+
+      <p class="text-center text-xs text-slate-400 mt-6">Authorized personnel only · All access is logged</p>
+      <!-- Admin accounts are separate from regular app users. If you have no admin yet,
+           run: cd backend && node src/create-admin.js -->
+      <p class="text-center text-xs text-slate-300 mt-2">Not a regular user account — admin accounts only</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════════════ -->
+<div id="app-shell" class="hidden flex min-h-screen">
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="w-64 bg-slate-900 fixed top-0 left-0 h-full flex flex-col z-40 shrink-0">
+
+    <!-- Brand -->
+    <div class="px-5 py-5 border-b border-slate-700/50">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center text-lg shrink-0">🐄</div>
+        <div>
+          <div class="text-white font-bold text-sm leading-tight">GrazeTrack</div>
+          <div class="text-slate-500 text-[10px] uppercase tracking-widest font-medium">Admin Console</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <p class="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-1">Main</p>
+
+      <button onclick="showSection('dashboard',this)" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Dashboard
+      </button>
+
+      <button onclick="showSection('users',this)" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        Users
+      </button>
+
+      <p class="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-4">Monitoring</p>
+
+      <button onclick="showSection('logs',this)" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Activity Logs
+      </button>
+
+      <button onclick="showSection('analytics',this)" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </button>
+
+      <button onclick="showSection('security',this)" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Security
+        <span id="security-badge" class="hidden ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+      </button>
+
+      <p class="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-4">System</p>
+
+      <button onclick="showSection('settings',this)" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <!-- Footer -->
+    <div class="border-t border-slate-700/50 p-4 space-y-1">
+      <div class="flex items-center gap-3 px-2 py-2">
+        <div id="admin-avatar" class="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">A</div>
+        <div class="overflow-hidden">
+          <div id="admin-email-display" class="text-slate-300 text-xs font-medium truncate">Loading…</div>
+          <div id="admin-level-display" class="text-slate-500 text-[10px] uppercase tracking-wider">ADMIN</div>
+        </div>
+      </div>
+      <button onclick="doLogout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 text-sm transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─── Main Content ─── -->
+  <div class="ml-64 flex-1 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-30 px-8 h-16 flex items-center justify-between shadow-sm">
+      <h1 id="page-title" class="text-lg font-bold text-slate-900">Dashboard</h1>
+      <div class="flex items-center gap-3">
+        <button onclick="refreshCurrentSection()" class="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg transition bg-white">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Refresh
+        </button>
+        <span id="last-updated" class="text-xs text-slate-400 hidden sm:block"></span>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 p-8">
+
+      <!-- ─────────── DASHBOARD ─────────── -->
+      <div class="section active" id="section-dashboard">
+
+        <!-- Stat Cards -->
+        <div id="stats-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+          <div class="col-span-2 lg:col-span-3 xl:col-span-6 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm text-slate-400 text-sm">
+            <span class="inline-block w-4 h-4 border-2 border-slate-300 border-t-brand-600 rounded-full spin mr-2"></span>Loading dashboard…
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Users by Role</h3>
+            <canvas id="chart-roles"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Login Activity (7 days)</h3>
+            <canvas id="chart-logins"></canvas>
+          </div>
+        </div>
+
+        <!-- Activity + Health -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-50 flex items-center gap-2">
+              <span class="text-base">⚡</span>
+              <h3 class="text-sm font-semibold text-slate-700">Recent Activity</h3>
+            </div>
+            <ul id="recent-activity-list" class="divide-y divide-slate-50 px-5">
+              <li class="py-4 text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-50 flex items-center gap-2">
+              <span class="text-base">💚</span>
+              <h3 class="text-sm font-semibold text-slate-700">System Health</h3>
+            </div>
+            <div id="health-grid" class="p-5 grid grid-cols-2 gap-3">
+              <div class="text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────── USERS ─────────── -->
+      <div class="section" id="section-users">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between flex-wrap gap-3">
+            <h2 class="text-sm font-semibold text-slate-700">All Users</h2>
+            <button onclick="openCreateUserModal()" class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              Add User
+            </button>
+          </div>
+          <!-- Filters -->
+          <div class="px-6 py-3 border-b border-slate-50 flex flex-wrap gap-3">
+            <input id="user-search" oninput="filterUsers()" type="text" placeholder="Search name or email…"
+              class="flex-1 min-w-[180px] px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition placeholder-slate-400" />
+            <select id="user-status-filter" onchange="filterUsers()" class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-600 transition cursor-pointer">
+              <option value="">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Suspended</option>
+            </select>
+            <select id="user-role-filter" onchange="filterUsers()" class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-600 transition cursor-pointer">
+              <option value="">All Roles</option>
+              <option value="Farmer">Farmer</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <!-- Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">User</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Role</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Joined</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Last Login</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody" class="divide-y divide-slate-50">
+                <tr><td colspan="7" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading users…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="users-pagination" class="px-6 py-4 border-t border-slate-50 flex items-center justify-between text-sm text-slate-500 flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- ─────────── LOGS ─────────── -->
+      <div class="section" id="section-logs">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between flex-wrap gap-3">
+            <h2 class="text-sm font-semibold text-slate-700">Activity Logs</h2>
+            <div class="flex gap-2">
+              <button onclick="exportLogs('csv')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 rounded-lg transition bg-white">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                CSV
+              </button>
+              <button onclick="exportLogs('json')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 rounded-lg transition bg-white">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                JSON
+              </button>
+            </div>
+          </div>
+          <div class="px-6 py-3 border-b border-slate-50 flex flex-wrap gap-3">
+            <input id="log-search" oninput="debounceSearchLogs()" type="text" placeholder="Search logs…"
+              class="flex-1 min-w-[180px] px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition placeholder-slate-400" />
+            <select id="log-action-filter" onchange="loadLogs()" class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-600 cursor-pointer">
+              <option value="">All Actions</option>
+              <option value="LOGIN">Login</option>
+              <option value="CREATE">Create</option>
+              <option value="UPDATE">Update</option>
+              <option value="DELETE">Delete</option>
+              <option value="READ">Read</option>
+            </select>
+            <select id="log-status-filter" onchange="loadLogs()" class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-600 cursor-pointer">
+              <option value="">All Statuses</option>
+              <option value="SUCCESS">Success</option>
+              <option value="FAILED">Failed</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Timestamp</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">User ID</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Resource</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">IP Address</th>
+                </tr>
+              </thead>
+              <tbody id="logs-tbody" class="divide-y divide-slate-50">
+                <tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading logs…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="logs-pagination" class="px-6 py-4 border-t border-slate-50 flex items-center justify-between text-sm text-slate-500 flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- ─────────── ANALYTICS ─────────── -->
+      <div class="section" id="section-analytics">
+        <div id="analytics-stats-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm text-slate-400 text-sm col-span-2 lg:col-span-4">
+            <span class="inline-block w-4 h-4 border-2 border-slate-300 border-t-brand-600 rounded-full spin mr-2"></span>Loading…
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Users by Role</h3>
+            <canvas id="chart-registrations"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Login Success vs Failures</h3>
+            <canvas id="chart-login-success"></canvas>
+          </div>
+        </div>
+        <!-- Login Trend (regression line) + Statistical Summary -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-1">Login Trend — 30 Days</h3>
+            <p class="text-xs text-slate-400 mb-3">Bars = daily logins &nbsp;·&nbsp; Dashed line = linear regression (least squares)</p>
+            <canvas id="chart-login-trend"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-3">Statistical Summary</h3>
+            <div id="stats-summary" class="text-sm text-slate-400">Loading…</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-slate-700">Feature Usage</h3>
+            <select id="feature-period" onchange="loadFeatureUsage()" class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-600 cursor-pointer">
+              <option value="week">Last 7 days</option>
+              <option value="month" selected>Last 30 days</option>
+            </select>
+          </div>
+          <div id="feature-usage-grid" class="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div class="text-sm text-slate-400 col-span-full"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────── SECURITY ─────────── -->
+      <div class="section" id="section-security">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm mb-4">
+          <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between flex-wrap gap-3">
+            <h2 class="text-sm font-semibold text-slate-700">Suspicious Activities</h2>
+            <select id="suspicious-limit" onchange="loadSuspicious()" class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="10">Last 10</option>
+              <option value="20" selected>Last 20</option>
+              <option value="50">Last 50</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Timestamp</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">User</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">IP</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Severity</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Description</th>
+                </tr>
+              </thead>
+              <tbody id="suspicious-tbody" class="divide-y divide-slate-50">
+                <tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-700">Active Admin Sessions</h2>
+            <span id="sessions-count-badge" class="hidden px-2.5 py-0.5 bg-brand-100 text-brand-700 text-xs font-semibold rounded-full"></span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Admin</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Level</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">IP Address</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Platform</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Logged In</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Last Active</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Expires</th>
+                </tr>
+              </thead>
+              <tbody id="sessions-tbody" class="divide-y divide-slate-50">
+                <tr><td colspan="7" class="px-6 py-8 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-6 py-3 border-t border-slate-50">
+            <p class="text-xs text-slate-400">Sessions expire automatically after 7 days. Last active timestamp updates on every API request.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────── SETTINGS ─────────── -->
+      <div class="section" id="section-settings">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <!-- Create Admin -->
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-50">
+              <h2 class="text-sm font-semibold text-slate-700">Create New Admin</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Super Admin only</p>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Email Address</label>
+                <input id="new-admin-email" type="email" placeholder="admin@example.com"
+                  class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition placeholder-slate-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Password</label>
+                <input id="new-admin-password" type="password" placeholder="Minimum 8 characters"
+                  class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition placeholder-slate-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Admin Level</label>
+                <select id="new-admin-level" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-700 transition cursor-pointer">
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Department <span class="text-slate-400 normal-case font-normal">(optional)</span></label>
+                <input id="new-admin-dept" type="text" placeholder="e.g. Operations"
+                  class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition placeholder-slate-400" />
+              </div>
+              <button onclick="createNewAdmin()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">Create Admin Account</button>
+            </div>
+          </div>
+
+          <!-- API Config -->
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-50">
+              <h2 class="text-sm font-semibold text-slate-700">API Configuration</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Backend server connection</p>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Backend URL</label>
+                <input id="api-url-input" type="text" placeholder="http://localhost:5000"
+                  class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition placeholder-slate-400" />
+              </div>
+              <button onclick="saveApiUrl()" class="w-full py-2.5 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-sm font-semibold rounded-xl transition bg-white">Save URL</button>
+              <div class="border-t border-slate-100 pt-4">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Connection Test</label>
+                <div id="api-test-result" class="px-4 py-3 bg-slate-50 rounded-xl text-sm text-slate-500 border border-slate-100 mb-3">Click "Test Connection" to verify</div>
+                <button onclick="testConnection()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">Test Connection</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-50">
+            <h2 class="text-sm font-semibold text-slate-700">System Information</h2>
+          </div>
+          <div id="system-info-grid" class="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Create / Edit User -->
+<div id="user-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md fade-up">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 id="user-modal-title" class="font-bold text-slate-900">Add New User</h3>
+      <button onclick="closeModal('user-modal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition text-sm">✕</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <input type="hidden" id="edit-user-id" />
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Full Name</label>
+        <input id="form-user-name" type="text" placeholder="John Doe" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Email Address</label>
+        <input id="form-user-email" type="email" placeholder="john@example.com" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+      </div>
+      <div id="form-password-group">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Password</label>
+        <input id="form-user-password" type="password" placeholder="Minimum 8 characters" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Role</label>
+          <select id="form-user-role" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white cursor-pointer">
+            <option value="Farmer">Farmer</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Phone</label>
+          <input id="form-user-phone" type="text" placeholder="+1 555 0100" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+      <button onclick="closeModal('user-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 rounded-xl transition">Cancel</button>
+      <button id="user-modal-save-btn" onclick="saveUser()" class="px-5 py-2 text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail -->
+<div id="user-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg fade-up max-h-[90vh] overflow-y-auto">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+      <h3 class="font-bold text-slate-900">User Profile</h3>
+      <button onclick="closeModal('user-detail-modal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition text-sm">✕</button>
+    </div>
+    <div id="user-detail-body" class="p-6">
+      <div class="text-center py-8 text-slate-400 text-sm"><span class="inline-block w-5 h-5 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>
+    </div>
+    <div id="user-detail-footer" class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3"></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm fade-up">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 id="confirm-title" class="font-bold text-slate-900">Confirm Action</h3>
+      <button onclick="closeModal('confirm-modal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition text-sm">✕</button>
+    </div>
+    <div class="p-6">
+      <p id="confirm-message" class="text-sm text-slate-600 leading-relaxed"></p>
+      <div id="confirm-reason-group" class="hidden mt-4">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Reason (optional)</label>
+        <textarea id="confirm-reason" rows="3" placeholder="Enter reason…"
+          class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none"></textarea>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+      <button onclick="closeModal('confirm-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 rounded-xl transition">Cancel</button>
+      <button id="confirm-ok-btn" class="px-5 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password -->
+<div id="reset-pw-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm fade-up">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 class="font-bold text-slate-900">Reset Password</h3>
+      <button onclick="closeModal('reset-pw-modal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition text-sm">✕</button>
+    </div>
+    <div class="p-6">
+      <input type="hidden" id="reset-pw-user-id" />
+      <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">New Password</label>
+      <input id="reset-pw-input" type="password" placeholder="Minimum 8 characters"
+        class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+    </div>
+    <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+      <button onclick="closeModal('reset-pw-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 rounded-xl transition">Cancel</button>
+      <button onclick="doResetPassword()" class="px-5 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+/* ── CONFIG ──
+   CRITICAL: These three variables are loaded from localStorage on every page load.
+   - API_BASE: the backend server URL (default: localhost:5000, changeable in Settings)
+   - adminToken: the JWT token saved after login — sent with every API request
+   - adminInfo: the logged-in admin's email and level, used to display in the sidebar
+   If adminToken is present when the page loads, the user is auto-logged in (see window.onload below).
+*/
+const DEFAULT_API = 'http://localhost:5000';
+let API_BASE   = localStorage.getItem('gt_api_url') || DEFAULT_API;
+let adminToken = localStorage.getItem('gt_admin_token') || null;
+let adminInfo  = JSON.parse(localStorage.getItem('gt_admin_info') || 'null');
+let currentSection = 'dashboard';
+const charts = {};
+// paging: tracks current page and total records for Users (20/page) and Logs (50/page)
+const paging = { users:{ page:1, total:0, limit:20 }, logs:{ page:1, total:0, limit:50 } };
+let logTimer = null;
+let allUsers = [];
+// Guard: prevents showing "session expired" toast more than once when multiple
+// simultaneous API calls all return 401 at the same time (e.g. on dashboard load).
+let logoutInProgress = false;
+
+/* ── NAV ACTIVE STYLE ── */
+const NAV_ACTIVE   = 'bg-brand-600/20 text-brand-400 font-semibold';
+const NAV_INACTIVE = 'text-slate-400 hover:text-white hover:bg-slate-800';
+
+/* ── API HELPER ──
+   CRITICAL: Every single request to the backend goes through this one function.
+   It automatically attaches "Authorization: Bearer <token>" to every request header.
+   If the server returns 401 (Unauthorized / token expired), it auto-logs the user out.
+   This is the central security gateway — no other function calls fetch() directly,
+   except exportLogs() which needs a raw blob response.
+*/
+async function api(method, path, body = null) {
+  const opts = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {})
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API_BASE}${path}`, opts);
+  const json = await res.json().catch(() => ({ success:false, message:'Invalid response' }));
+  // Only trigger "session expired" if:
+  //   1. We were already logged in (adminToken existed before this call), AND
+  //   2. This is NOT the login endpoint (a 401 on login just means wrong credentials).
+  // This prevents the login form from incorrectly showing "session expired" toasts.
+  if (res.status === 401 && adminToken && !path.includes('/auth/login')) {
+    if (!logoutInProgress) {
+      logoutInProgress = true;
+      toast('Session expired — please log in again', 'error');
+      doLogout(true);
+    }
+    throw new Error('Unauthorized');
+  }
+  return { status:res.status, ok:res.ok, ...json };
+}
+
+/* ── AUTH ──
+   CRITICAL: doLogin() is the entry point for admin authentication.
+   Flow: collect email+password → POST /api/v1/admin/auth/login
+   On success: save token + adminInfo to localStorage, then call showApp().
+   On failure: show inline error message (no page reload needed).
+   doLogout() does the reverse: calls the backend logout endpoint, clears
+   localStorage, and sends the user back to the login screen.
+*/
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  err.classList.add('hidden');
+  if (!email || !pass) { showLoginErr('Email and password are required.'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin mr-2"></span>Signing in…';
+  try {
+    const res = await api('POST', '/api/v1/admin/auth/login', { email, password: pass });
+    if (!res.success) {
+      // 401/403 means wrong credentials OR account is not an admin account.
+      // Admin accounts must be created first via: cd backend && node src/create-admin.js
+      if (res.status === 401 || res.status === 403) {
+        throw new Error((res.message || 'Invalid credentials') + '. Only admin accounts can access this portal.');
+      }
+      throw new Error(res.message || 'Login failed');
+    }
+    adminToken = res.data.token; adminInfo = res.data.admin;
+    localStorage.setItem('gt_admin_token', adminToken);
+    localStorage.setItem('gt_admin_info', JSON.stringify(adminInfo));
+    showApp();
+  } catch (e) {
+    showLoginErr(e.message);
+    btn.disabled = false; btn.textContent = 'Sign in to Dashboard';
+  }
+}
+function showLoginErr(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = '⚠ ' + msg; el.classList.remove('hidden');
+}
+async function doLogout(silent = false) {
+  if (!silent && adminToken) { try { await api('POST', '/api/v1/admin/auth/logout'); } catch(_){} }
+  adminToken = null; adminInfo = null;
+  logoutInProgress = false; // reset the guard so the next login attempt works normally
+  localStorage.removeItem('gt_admin_token'); localStorage.removeItem('gt_admin_info');
+  document.getElementById('app-shell').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+}
+// Fixed: the original condition had a broken OR that triggered doLogin() on EVERY
+// keypress (not just Enter) because of operator precedence. Now it only fires on
+// Enter when the login screen is actually visible (display is not 'none').
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+/* ── BOOTSTRAP ──
+   CRITICAL: showApp() is called after a successful login OR on page reload if a
+   valid token already exists in localStorage (see window.onload below).
+   It hides the login screen, shows the main dashboard, fills in the admin's name
+   and role in the sidebar, then immediately loads the Dashboard section.
+*/
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').classList.remove('hidden');
+  if (adminInfo) {
+    document.getElementById('admin-email-display').textContent = adminInfo.email || '—';
+    document.getElementById('admin-level-display').textContent = adminInfo.adminLevel || 'ADMIN';
+    document.getElementById('admin-avatar').textContent = (adminInfo.email || 'A')[0].toUpperCase();
+  }
+  document.getElementById('api-url-input').value = API_BASE;
+  setNavActive(document.querySelector('.nav-item'));
+  loadDashboard();
+}
+// CRITICAL: Auto-login on page reload — if the token and admin info are already
+// saved in localStorage (from a previous session), skip the login screen entirely.
+window.addEventListener('load', () => { if (adminToken && adminInfo) showApp(); });
+
+/* ── NAVIGATION ── */
+const TITLES = { dashboard:'Dashboard', users:'User Management', logs:'Activity Logs', analytics:'Analytics', security:'Security', settings:'Settings' };
+
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove(...NAV_ACTIVE.split(' ')); n.classList.add(...NAV_INACTIVE.split(' ')); });
+  document.getElementById('section-' + name).classList.add('active');
+  if (el) setNavActive(el);
+  document.getElementById('page-title').textContent = TITLES[name] || name;
+  currentSection = name;
+  const loaders = { dashboard:loadDashboard, users:loadUsers, logs:loadLogs, analytics:loadAnalytics, security:loadSuspicious, settings:loadSettings };
+  if (loaders[name]) loaders[name]();
+}
+function setNavActive(el) {
+  if (!el) return;
+  el.classList.remove(...NAV_INACTIVE.split(' '));
+  el.classList.add(...NAV_ACTIVE.split(' '));
+}
+function refreshCurrentSection() { showSection(currentSection, document.querySelector('.nav-item.active') || document.querySelector('.nav-item')); }
+function setLastUpdated() { const el = document.getElementById('last-updated'); el.textContent = 'Updated '+new Date().toLocaleTimeString(); el.classList.remove('hidden'); }
+
+/* ── DASHBOARD ── */
+async function loadDashboard() {
+  try {
+    const res = await api('GET', '/api/v1/admin/analytics/dashboard');
+    if (!res.success) throw new Error(res.message);
+    const { overview={}, userStatistics={}, systemHealth={}, loginActivity={}, suspiciousActivities=[], suspiciousSummary={} } = res.data;
+    renderStatCards(overview, userStatistics);
+    renderRolesChart(userStatistics.usersByRole || {});
+    renderLoginChart(loginActivity.loginsPerDay || {});
+    renderRecentActivity(overview.recentActivities || []);
+    renderHealthGrid(systemHealth);
+    // CRITICAL: If there are suspicious activities, show the red alert badge
+    // on the Security nav item so the admin sees it immediately on login.
+    const alertCount = suspiciousSummary.total || 0;
+    const badge = document.getElementById('security-badge');
+    if (alertCount > 0) { badge.textContent = alertCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+    setLastUpdated();
+  } catch(e) {
+    document.getElementById('stats-grid').innerHTML = `<div class="col-span-full bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-5">⚠ Failed to load: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderStatCards(ov={}, st={}) {
+  const cards = [
+    { label:'Total Users',     value: ov.totalUsers??0,                icon:'👥', color:'bg-blue-50 text-blue-600',   sub:`${ov.activeUsersPercentage??0}% active` },
+    { label:'Active Users',    value: ov.activeUsers??0,               icon:'✅', color:'bg-emerald-50 text-emerald-600', sub:`${ov.activeSessions??0} live sessions` },
+    { label:'Suspended',       value: ov.suspendedUsers??0,            icon:'🚫', color:'bg-red-50 text-red-500',     sub:'Inactive accounts' },
+    { label:'New Today',       value: ov.newRegistrationsToday??0,     icon:'🆕', color:'bg-amber-50 text-amber-500', sub:'Registrations' },
+    { label:'This Month',      value: st.newRegistrations??0,          icon:'📅', color:'bg-purple-50 text-purple-600', sub:'New registrations' },
+    { label:'Live Sessions',   value: ov.activeSessions??0,            icon:'🔐', color:'bg-teal-50 text-teal-600',   sub:'Concurrent users' },
+  ];
+  document.getElementById('stats-grid').innerHTML = cards.map(c => `
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+      <div class="w-12 h-12 rounded-xl ${c.color} flex items-center justify-center text-2xl shrink-0">${c.icon}</div>
+      <div class="min-w-0">
+        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide truncate">${c.label}</p>
+        <p class="text-2xl font-bold text-slate-900 leading-tight">${num(c.value)}</p>
+        <p class="text-xs text-slate-400 mt-0.5">${c.sub}</p>
+      </div>
+    </div>`).join('');
+}
+
+function renderRolesChart(roleStats) {
+  const ctx = document.getElementById('chart-roles');
+  if (charts.roles) charts.roles.destroy();
+  const total = Object.values(roleStats).reduce((a,b)=>a+b, 0);
+  charts.roles = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(roleStats),
+      datasets: [{ data: Object.values(roleStats), backgroundColor: ['#4f46e5','#10b981','#f59e0b','#ef4444'], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16 } },
+        // Tooltip shows: role name, count, and calculated percentage of total users
+        tooltip: { callbacks: { label: ctx => {
+          const pct = total > 0 ? (ctx.raw / total * 100).toFixed(1) : 0;
+          return ` ${ctx.label}: ${ctx.raw} users (${pct}% of ${total})`;
+        }}}
+      }
+    }
+  });
+}
+// Least-squares linear regression — returns a trend line array the same length as values
+function linearRegression(values) {
+  const n = values.length;
+  if (n < 2) return values.map(v => v);
+  const sumX  = values.reduce((s,_,i) => s+i, 0);
+  const sumY  = values.reduce((s,v)   => s+v, 0);
+  const sumXY = values.reduce((s,v,i) => s+i*v, 0);
+  const sumX2 = values.reduce((s,_,i) => s+i*i, 0);
+  const denom = n*sumX2 - sumX*sumX;
+  if (!denom) return values.map(() => sumY/n);
+  const slope     = (n*sumXY - sumX*sumY) / denom;
+  const intercept = (sumY - slope*sumX) / n;
+  return values.map((_,i) => Math.max(0, parseFloat((intercept + slope*i).toFixed(2))));
+}
+function renderLoginChart(lpd) {
+  const ctx = document.getElementById('chart-logins');
+  if (charts.logins) charts.logins.destroy();
+  const sorted = Object.entries(lpd).sort(([a],[b])=>a.localeCompare(b));
+  const values  = sorted.map(([,v])=>v);
+  const trend   = linearRegression(values);
+  const total7d = values.reduce((s,v)=>s+v, 0);
+  const avg     = sorted.length > 0 ? (total7d / sorted.length).toFixed(1) : 0;
+  charts.logins = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([d])=>d.slice(5)),
+      datasets: [
+        { type:'bar',  label:'Logins', data:values, backgroundColor:'rgba(79,70,229,.75)', borderRadius:6, order:2 },
+        { type:'line', label:'Trend',  data:trend,  borderColor:'#ef4444', borderWidth:2, borderDash:[5,5], pointRadius:0, fill:false, tension:0, order:1 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true, labels: { boxWidth: 12, font: { size: 11 } } },
+        // Tooltip shows count per day AND running total context
+        tooltip: { callbacks: {
+          label: c => c.dataset.label==='Trend' ? ` Trend: ${c.raw}` : ` ${c.raw} login${c.raw!==1?'s':''}`,
+          afterBody: () => [`7-day total: ${total7d}`, `Daily avg: ${avg}`]
+        }}
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+function renderRecentActivity(acts) {
+  const list = document.getElementById('recent-activity-list');
+  if (!acts.length) { list.innerHTML = '<li class="py-6 text-center text-sm text-slate-400">No recent activity</li>'; return; }
+  list.innerHTML = acts.map(a => {
+    const dot = a.status==='SUCCESS' ? 'bg-emerald-500' : a.status==='FAILED' ? 'bg-red-500' : 'bg-blue-500';
+    return `<li class="py-3 flex gap-3 items-start">
+      <span class="mt-1.5 w-2 h-2 rounded-full ${dot} shrink-0"></span>
+      <div><p class="text-sm text-slate-700">${esc(a.message||`${a.actionType} on ${a.resourceType}`)}</p><p class="text-xs text-slate-400 mt-0.5">${fmtDate(a.timestamp)}</p></div>
+    </li>`;
+  }).join('');
+}
+function renderHealthGrid(h={}) {
+  // Only color-code values that are actually present — never guess a status
+  const dbColor   = h.databaseStatus === 'HEALTHY' ? 'text-emerald-600' : h.databaseStatus ? 'text-red-500' : 'text-slate-400';
+  const errRate   = h.errorRate != null ? parseFloat(h.errorRate) : null;
+  const errColor  = errRate === null ? 'text-slate-400' : errRate > 5 ? 'text-red-500' : 'text-emerald-600';
+  // uptime is now a formatted string from the backend (e.g. "2.5h" or "43m"), not a number
+  const uptimeVal = h.uptime != null ? h.uptime : '—';
+  const uptimeClr = h.uptime != null ? 'text-emerald-600' : 'text-slate-400';
+  document.getElementById('health-grid').innerHTML = `
+    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-center">
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Database</p>
+      <p class="font-bold ${dbColor} text-sm">${h.databaseStatus||'—'}</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-center">
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Error Rate</p>
+      <p class="font-bold text-sm ${errColor}">${h.errorRate||'—'}</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-center">
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Uptime</p>
+      <p class="font-bold ${uptimeClr} text-sm">${uptimeVal}</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-center">
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Response</p>
+      <p class="font-bold text-slate-700 text-sm">${h.apiResponseTime != null ? h.apiResponseTime + 'ms' : '—'}</p>
+    </div>`;
+}
+
+/* ── USERS ── */
+async function loadUsers() {
+  const { page, limit } = paging.users;
+  const status = document.getElementById('user-status-filter').value;
+  const role   = document.getElementById('user-role-filter').value;
+  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>';
+  try {
+    let url = `/api/v1/admin/users?page=${page}&limit=${limit}`;
+    if (status) url += `&status=${status}`;
+    if (role)   url += `&role=${role}`;
+    const res = await api('GET', url);
+    if (!res.success) throw new Error(res.message);
+    allUsers = res.data.users || [];
+    paging.users.total = res.data.pagination?.total || 0;
+    filterUsers(); renderUsersPagination(); setLastUpdated();
+  } catch(e) {
+    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-sm text-red-500">Error: ${esc(e.message)}</td></tr>`;
+  }
+}
+function filterUsers() {
+  const s = document.getElementById('user-search').value.toLowerCase();
+  const filtered = allUsers.filter(u => !s || (u.name||'').toLowerCase().includes(s) || (u.email||'').toLowerCase().includes(s));
+  const tbody = document.getElementById('users-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center"><p class="text-slate-400 text-sm">No users found</p></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(u => `
+    <tr class="hover:bg-slate-50/70 transition-colors group">
+      <td class="px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold shrink-0">${(u.name||u.email||'?')[0].toUpperCase()}</div>
+          <span class="text-sm font-semibold text-slate-800">${esc(u.name||'—')}</span>
+        </div>
+      </td>
+      <td class="px-4 py-4 text-sm text-slate-600">${esc(u.email)}</td>
+      <td class="px-4 py-4"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${roleBadge(u.role)}">${esc(u.role||'—')}</span></td>
+      <td class="px-4 py-4"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.isActive?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-600'}">${u.isActive?'Active':'Suspended'}</span></td>
+      <td class="px-4 py-4 text-sm text-slate-500">${fmtDateShort(u.createdAt)}</td>
+      <td class="px-4 py-4 text-sm ${u.lastLoginAt?'text-slate-500':'text-slate-300'}">${u.lastLoginAt?fmtDateShort(u.lastLoginAt):'Never'}</td>
+      <td class="px-4 py-4">
+        <div class="flex items-center gap-1.5">
+          <button onclick="viewUser('${u.id}')" title="View" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs transition">👁</button>
+          <button onclick="editUser('${u.id}')" title="Edit" class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs transition">✏</button>
+          ${u.isActive
+            ? `<button onclick="confirmSuspend('${u.id}')" title="Suspend" class="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs transition">🚫</button>`
+            : `<button onclick="confirmReactivate('${u.id}')" title="Reactivate" class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs transition">✅</button>`}
+          <button onclick="openResetPassword('${u.id}')" title="Reset Password" class="w-7 h-7 flex items-center justify-center rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs transition">🔑</button>
+          <button onclick="confirmDelete('${u.id}')" title="Delete" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs transition">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function renderUsersPagination() {
+  const { page, total, limit } = paging.users;
+  const pages = Math.ceil(total/limit);
+  document.getElementById('users-pagination').innerHTML = `
+    <span class="text-xs">${num((page-1)*limit+1)}–${num(Math.min(page*limit,total))} of ${num(total)} users</span>
+    <div class="flex gap-1.5">
+      <button onclick="usersPage(${page-1})" ${page<=1?'disabled':''} class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">← Prev</button>
+      <span class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg font-semibold">${page}</span>
+      <button onclick="usersPage(${page+1})" ${page>=pages?'disabled':''} class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">Next →</button>
+    </div>`;
+}
+function usersPage(p) { paging.users.page=p; loadUsers(); }
+
+async function viewUser(id) {
+  openModal('user-detail-modal');
+  document.getElementById('user-detail-body').innerHTML = '<div class="py-8 text-center text-slate-400 text-sm"><span class="inline-block w-5 h-5 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>';
+  document.getElementById('user-detail-footer').innerHTML = '';
+  try {
+    const [uRes, aRes] = await Promise.all([api('GET',`/api/v1/admin/users/${id}`), api('GET',`/api/v1/admin/users/${id}/activity`)]);
+    const u  = uRes.data?.user||{};
+    const ac = aRes.data?.summary?.activityCounts||{};
+    document.getElementById('user-detail-body').innerHTML = `
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center text-2xl font-bold">${(u.name||u.email||'?')[0].toUpperCase()}</div>
+        <div class="flex-1">
+          <p class="text-lg font-bold text-slate-900">${esc(u.name||'—')}</p>
+          <p class="text-sm text-slate-500">${esc(u.email)}</p>
+        </div>
+        <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold ${u.isActive?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-600'}">${u.isActive?'Active':'Suspended'}</span>
+      </div>
+      <div class="space-y-2 mb-6">
+        ${row('Role',`<span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${roleBadge(u.role)}">${esc(u.role)}</span>`)}
+        ${row('Phone',esc(u.phone||'—'))}
+        ${row('Joined',fmtDate(u.createdAt))}
+        ${row('Last Login',u.lastLoginAt?fmtDate(u.lastLoginAt):'Never')}
+      </div>
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Farm Activity</p>
+      <div class="grid grid-cols-3 gap-2">
+        ${Object.entries({'🐄 Animals':ac.animals,'💊 Health':ac.healthRecords,'🌾 Feed':ac.feedRecords,'💸 Expenses':ac.expenses,'📦 Sales':ac.sales,'🏪 Listings':ac.listings}).map(([k,v])=>`
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center"><p class="text-xl font-bold text-slate-800">${v??0}</p><p class="text-xs text-slate-500 mt-0.5">${k}</p></div>`).join('')}
+      </div>`;
+    document.getElementById('user-detail-footer').innerHTML = `
+      <button onclick="closeModal('user-detail-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 rounded-xl hover:border-slate-300 transition">Close</button>
+      <button onclick="closeModal('user-detail-modal');editUser('${id}')" class="px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition">Edit</button>
+      ${u.isActive
+        ? `<button onclick="closeModal('user-detail-modal');confirmSuspend('${id}')" class="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition">Suspend</button>`
+        : `<button onclick="closeModal('user-detail-modal');confirmReactivate('${id}')" class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition">Reactivate</button>`}`;
+  } catch(e) {
+    document.getElementById('user-detail-body').innerHTML = `<p class="text-red-500 text-sm text-center py-6">${esc(e.message)}</p>`;
+  }
+}
+function row(label,val){ return `<div class="flex items-center py-2 border-b border-slate-50"><span class="w-28 text-xs font-semibold text-slate-500 shrink-0">${label}</span><span class="text-sm text-slate-700">${val}</span></div>`; }
+
+function openCreateUserModal() {
+  ['edit-user-id','form-user-name','form-user-email','form-user-password','form-user-phone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('form-user-role').value='Farmer';
+  document.getElementById('user-modal-title').textContent='Add New User';
+  document.getElementById('user-modal-save-btn').textContent='Create User';
+  document.getElementById('form-password-group').classList.remove('hidden');
+  openModal('user-modal');
+}
+function editUser(id) {
+  const u = allUsers.find(x=>x.id===id); if(!u) return;
+  document.getElementById('edit-user-id').value=id;
+  document.getElementById('form-user-name').value=u.name||'';
+  document.getElementById('form-user-email').value=u.email||'';
+  document.getElementById('form-user-role').value=u.role||'Farmer';
+  document.getElementById('form-user-phone').value=u.phone||'';
+  document.getElementById('user-modal-title').textContent='Edit User';
+  document.getElementById('user-modal-save-btn').textContent='Save Changes';
+  document.getElementById('form-password-group').classList.add('hidden');
+  openModal('user-modal');
+}
+// CRITICAL: saveUser() handles both CREATE and EDIT in one function.
+// If edit-user-id is empty → POST (create new user).
+// If edit-user-id has a value → PUT (update existing user, no password change).
+async function saveUser() {
+  const id=document.getElementById('edit-user-id').value;
+  const p={ name:document.getElementById('form-user-name').value.trim(), email:document.getElementById('form-user-email').value.trim(), role:document.getElementById('form-user-role').value, phone:document.getElementById('form-user-phone').value.trim(), password:document.getElementById('form-user-password').value };
+  if(!p.email){ toast('Email is required','error'); return; }
+  try {
+    const res = id ? await api('PUT',`/api/v1/admin/users/${id}`,{ name:p.name, role:p.role, phone:p.phone }) : await api('POST','/api/v1/admin/users',p);
+    if(!res.success) throw new Error(res.message);
+    toast(id?'User updated successfully':'User created successfully','success');
+    closeModal('user-modal'); loadUsers();
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+function confirmSuspend(id) {
+  const u=allUsers.find(x=>x.id===id);
+  showConfirm('Suspend User',`Suspend <strong>${esc(u?.name||u?.email||id)}</strong>? They will lose access immediately.`,true,async(reason)=>{ try{ const r=await api('PUT',`/api/v1/admin/users/${id}/suspend`,{reason}); if(!r.success)throw new Error(r.message); toast('User suspended','warning'); loadUsers(); }catch(e){ toast('Error: '+e.message,'error'); } });
+}
+function confirmReactivate(id) {
+  const u=allUsers.find(x=>x.id===id);
+  showConfirm('Reactivate User',`Reactivate <strong>${esc(u?.name||u?.email||id)}</strong>? They will regain full access.`,false,async()=>{ try{ const r=await api('PUT',`/api/v1/admin/users/${id}/reactivate`); if(!r.success)throw new Error(r.message); toast('User reactivated','success'); loadUsers(); }catch(e){ toast('Error: '+e.message,'error'); } });
+}
+function confirmDelete(id) {
+  const u=allUsers.find(x=>x.id===id);
+  showConfirm('⚠ Delete User',`Permanently delete <strong>${esc(u?.name||u?.email||id)}</strong>? This cannot be undone.`,false,async()=>{ try{ const r=await api('DELETE',`/api/v1/admin/users/${id}`); if(!r.success)throw new Error(r.message); toast('User deleted','success'); loadUsers(); }catch(e){ toast('Error: '+e.message,'error'); } });
+}
+function openResetPassword(id) { document.getElementById('reset-pw-user-id').value=id; document.getElementById('reset-pw-input').value=''; openModal('reset-pw-modal'); }
+async function doResetPassword() {
+  const id=document.getElementById('reset-pw-user-id').value, pw=document.getElementById('reset-pw-input').value;
+  if(!pw||pw.length<8){ toast('Password must be at least 8 characters','error'); return; }
+  try{ const r=await api('POST',`/api/v1/admin/users/${id}/reset-password`,{password:pw}); if(!r.success)throw new Error(r.message); toast('Password reset successfully','success'); closeModal('reset-pw-modal'); }catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+/* ── LOGS ── */
+async function loadLogs() {
+  const { page, limit } = paging.logs;
+  const action = document.getElementById('log-action-filter').value;
+  const status = document.getElementById('log-status-filter').value;
+  document.getElementById('logs-tbody').innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>';
+  try {
+    let url=`/api/v1/admin/logs?page=${page}&limit=${limit}`;
+    if(action) url+=`&actionType=${action}`;
+    if(status) url+=`&status=${status}`;
+    const res = await api('GET', url);
+    if(!res.success) throw new Error(res.message);
+    paging.logs.total = res.data.pagination?.total||0;
+    renderLogsTable(res.data.logs||[]); renderLogsPagination(); setLastUpdated();
+  } catch(e) {
+    document.getElementById('logs-tbody').innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-red-500">Error: ${esc(e.message)}</td></tr>`;
+  }
+}
+function renderLogsTable(logs) {
+  const tbody = document.getElementById('logs-tbody');
+  if(!logs.length){ tbody.innerHTML='<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">No logs found</td></tr>'; return; }
+  tbody.innerHTML = logs.map(l=>`
+    <tr class="hover:bg-slate-50/70 transition-colors">
+      <td class="px-6 py-3 text-xs text-slate-500 whitespace-nowrap">${fmtDate(l.timestamp)}</td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-400">${esc((l.userId||'').slice(0,12))}…</td>
+      <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold ${actionBadge(l.actionType)}">${esc(l.actionType||'—')}</span></td>
+      <td class="px-4 py-3 text-xs text-slate-600">${esc(l.resourceType||'—')}</td>
+      <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold ${l.status==='SUCCESS'?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-600'}">${esc(l.status||'—')}</span></td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-400">${esc(l.ipAddress||'—')}</td>
+    </tr>`).join('');
+}
+function renderLogsPagination() {
+  const { page, total, limit } = paging.logs;
+  const pages = Math.ceil(total/limit);
+  document.getElementById('logs-pagination').innerHTML = `
+    <span class="text-xs">${num((page-1)*limit+1)}–${num(Math.min(page*limit,total))} of ${num(total)} logs</span>
+    <div class="flex gap-1.5">
+      <button onclick="logsPage(${page-1})" ${page<=1?'disabled':''} class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">← Prev</button>
+      <span class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg font-semibold">${page}</span>
+      <button onclick="logsPage(${page+1})" ${page>=pages?'disabled':''} class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">Next →</button>
+    </div>`;
+}
+function logsPage(p) { paging.logs.page=p; loadLogs(); }
+function debounceSearchLogs() { clearTimeout(logTimer); logTimer=setTimeout(async()=>{ const q=document.getElementById('log-search').value.trim(); if(!q){loadLogs();return;} document.getElementById('logs-tbody').innerHTML='<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Searching…</td></tr>'; try{ const r=await api('POST','/api/v1/admin/logs/search',{query:q}); renderLogsTable(r.data?.logs||[]); }catch(e){ document.getElementById('logs-tbody').innerHTML=`<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-red-500">${esc(e.message)}</td></tr>`; } },400); }
+// CRITICAL: exportLogs() cannot use the api() helper because it needs a raw
+// file blob (binary data), not a JSON response. It manually creates a temporary
+// <a> element, sets the download URL to the blob, triggers a click, then cleans up.
+async function exportLogs(fmt) {
+  try {
+    const res=await fetch(`${API_BASE}/api/v1/admin/logs/export`,{ method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${adminToken}` }, body:JSON.stringify({format:fmt}) });
+    if(!res.ok) throw new Error('Export failed');
+    const blob=await res.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`grazetrack-logs-${Date.now()}.${fmt}`; a.click(); URL.revokeObjectURL(url);
+    toast(`Exported as ${fmt.toUpperCase()}`,'success');
+  } catch(e){ toast('Export failed: '+e.message,'error'); }
+}
+
+/* ── ANALYTICS ── */
+async function loadAnalytics() {
+  try {
+    const [ovRes,loginRes,stRes] = await Promise.all([api('GET','/api/v1/admin/analytics/overview'), api('GET','/api/v1/admin/analytics/login-activity?period=month'), api('GET','/api/v1/admin/analytics/users?period=month')]);
+    const ov=ovRes.data?.overview||{}, ls=loginRes.data?.statistics||{}, st=stRes.data?.statistics||{};
+    document.getElementById('analytics-stats-grid').innerHTML = [
+      { label:'Total Users', value:ov.totalUsers??0, icon:'👥', c:'bg-blue-50 text-blue-600' },
+      { label:'Logins (30d)', value:ls.totalLogins??0, icon:'🔐', c:'bg-indigo-50 text-indigo-600', sub:`${ls.successRate??0}% success rate` },
+      { label:'Successful', value:ls.successfulLogins??0, icon:'✅', c:'bg-emerald-50 text-emerald-600' },
+      { label:'Failed Logins', value:ls.failedLogins??0, icon:'❌', c:'bg-red-50 text-red-500' },
+    ].map(c=>`<div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition"><div class="w-12 h-12 rounded-xl ${c.c} flex items-center justify-center text-2xl shrink-0">${c.icon}</div><div><p class="text-xs text-slate-500 font-medium uppercase tracking-wide">${c.label}</p><p class="text-2xl font-bold text-slate-900">${num(c.value)}</p>${c.sub?`<p class="text-xs text-slate-400">${c.sub}</p>`:''}</div></div>`).join('');
+    const role=st.usersByRole||{};
+    const roleTotal=Object.values(role).reduce((a,b)=>a+b,0);
+    // Users by Role bar chart — tooltip shows count AND share percentage
+    const rCtx=document.getElementById('chart-registrations'); if(charts.reg)charts.reg.destroy();
+    charts.reg=new Chart(rCtx,{type:'bar',data:{labels:Object.keys(role),datasets:[{label:'Users',data:Object.values(role),backgroundColor:['#4f46e5','#10b981','#f59e0b'],borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const pct=roleTotal>0?(ctx.raw/roleTotal*100).toFixed(1):0;return ` ${ctx.raw} users (${pct}% of ${roleTotal})`;}}}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{grid:{display:false}}}}});
+    // Login success vs failure doughnut — tooltip shows count, percentage, and success rate
+    const loginTotal=(ls.successfulLogins??0)+(ls.failedLogins??0);
+    const lCtx=document.getElementById('chart-login-success'); if(charts.ls)charts.ls.destroy();
+    charts.ls=new Chart(lCtx,{type:'doughnut',data:{labels:['Successful','Failed'],datasets:[{data:[ls.successfulLogins??0,ls.failedLogins??0],backgroundColor:['#10b981','#ef4444'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:16}},tooltip:{callbacks:{label:ctx=>{const pct=loginTotal>0?(ctx.raw/loginTotal*100).toFixed(1):0;return ` ${ctx.label}: ${ctx.raw} (${pct}% of ${loginTotal} total)`;}}}}}})
+    // Regression trend chart + statistical summary panel (Analytics section only)
+    renderLoginTrendChart(ls.loginsPerDay||{});
+    renderStatsSummary(ls, ls.loginsPerDay||{});
+    loadFeatureUsage(); setLastUpdated();
+  } catch(e) { document.getElementById('analytics-stats-grid').innerHTML=`<div class="col-span-full bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-5">Error: ${esc(e.message)}</div>`; }
+}
+async function loadFeatureUsage() {
+  const period=document.getElementById('feature-period')?.value||'month';
+  const grid=document.getElementById('feature-usage-grid');
+  grid.innerHTML='<div class="text-sm text-slate-400 col-span-full"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</div>';
+  try {
+    const res=await api('GET',`/api/v1/admin/analytics/features?period=${period}`);
+    const usage=res.data?.statistics?.featureUsage||{};
+    if(!Object.keys(usage).length){ grid.innerHTML='<p class="text-slate-400 text-sm col-span-full text-center py-4">No feature usage data yet</p>'; return; }
+    grid.innerHTML=Object.entries(usage).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center"><p class="text-2xl font-bold text-brand-600">${v}</p><p class="text-xs text-slate-500 mt-1">${esc(k)}</p></div>`).join('');
+  } catch(e){ grid.innerHTML=`<p class="text-red-500 text-sm col-span-full">Error: ${esc(e.message)}</p>`; }
+}
+
+// Renders the 30-day Login Trend bar+line chart with a linear regression overlay
+function renderLoginTrendChart(lpd) {
+  const ctx = document.getElementById('chart-login-trend');
+  if (!ctx) return;
+  if (charts.loginTrend) charts.loginTrend.destroy();
+  const sorted = Object.entries(lpd).sort(([a],[b])=>a.localeCompare(b));
+  const values = sorted.map(([,v])=>v);
+  const trend  = linearRegression(values);
+  charts.loginTrend = new Chart(ctx, {
+    data: {
+      labels: sorted.map(([d])=>d.slice(5)),
+      datasets: [
+        { type:'bar',  label:'Daily Logins', data:values, backgroundColor:'rgba(99,102,241,.55)', borderRadius:4, order:2 },
+        { type:'line', label:'Linear Trend', data:trend,  borderColor:'#ef4444', borderWidth:2.5, borderDash:[6,4], pointRadius:0, fill:false, tension:0, order:1 }
+      ]
+    },
+    options: {
+      responsive:true,
+      plugins:{
+        legend:{display:true,labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label==='Linear Trend'?` Trend: ${c.raw}`:` ${c.raw} logins`}}
+      },
+      scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+// Computes mean, peak, std deviation, and trend direction from daily login data
+function renderStatsSummary(ls, loginsPerDay) {
+  const el = document.getElementById('stats-summary');
+  if (!el) return;
+  const values = Object.values(loginsPerDay);
+  const n = values.length;
+  if (!n) { el.innerHTML='<p class="text-slate-400 text-sm">No login data yet for this period</p>'; return; }
+  const total   = values.reduce((s,v)=>s+v, 0);
+  const mean    = total / n;
+  const max     = Math.max(...values);
+  const min     = Math.min(...values);
+  const variance= values.reduce((s,v)=>s+Math.pow(v-mean,2), 0) / n;
+  const stdDev  = Math.sqrt(variance).toFixed(2);
+  // Compare first-half avg to second-half avg to determine trend direction
+  const half   = Math.floor(n/2);
+  const avg1   = values.slice(0,half||1).reduce((s,v)=>s+v,0)/(half||1);
+  const avg2   = values.slice(half).reduce((s,v)=>s+v,0)/((n-half)||1);
+  const trendLabel = avg2 > avg1*1.05 ? '↑ Rising' : avg2 < avg1*0.95 ? '↓ Falling' : '→ Stable';
+  const trendColor = avg2 > avg1*1.05 ? 'text-emerald-600' : avg2 < avg1*0.95 ? 'text-red-500' : 'text-slate-500';
+  const sr = ls.successRate ?? 0;
+  const srColor = sr >= 90 ? 'text-emerald-600' : sr >= 70 ? 'text-amber-500' : 'text-red-500';
+  el.innerHTML = [
+    { label:'Total (30d)',     value: ls.totalLogins??0,    color:'text-slate-800' },
+    { label:'Daily Mean',      value: mean.toFixed(1),      color:'text-slate-800' },
+    { label:'Peak Day',        value: max,                  color:'text-indigo-600' },
+    { label:'Lowest Day',      value: min,                  color:'text-slate-600' },
+    { label:'Std Deviation',   value: stdDev,               color:'text-slate-800' },
+    { label:'Trend Direction', value: trendLabel,           color: trendColor      },
+    { label:'Success Rate',    value: sr+'%',               color: srColor         },
+    { label:'Failed Logins',   value: ls.failedLogins??0,   color: (ls.failedLogins??0)>0?'text-red-500':'text-emerald-600' },
+  ].map(r=>`<div class="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
+    <span class="text-xs text-slate-500">${r.label}</span>
+    <span class="text-sm font-bold ${r.color}">${r.value}</span>
+  </div>`).join('');
+}
+
+/* ── SECURITY ── */
+// loadSuspicious and loadActiveSessions both run when the Security section is opened
+async function loadSuspicious() {
+  loadActiveSessions(); // always refresh sessions when security tab opens
+  const limit=document.getElementById('suspicious-limit')?.value||20;
+  const tbody=document.getElementById('suspicious-tbody');
+  tbody.innerHTML='<tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>';
+  try {
+    const res=await api('GET',`/api/v1/admin/analytics/suspicious?limit=${limit}`);
+    const acts=res.data?.activities||[];
+    if(!acts.length){ tbody.innerHTML='<tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">🔒 No suspicious activities detected</td></tr>'; return; }
+    tbody.innerHTML=acts.map(a=>`<tr class="hover:bg-slate-50 transition-colors"><td class="px-6 py-3 text-xs text-slate-500 whitespace-nowrap">${fmtDate(a.timestamp)}</td><td class="px-4 py-3 text-xs text-slate-700">${esc(a.eventType||a.type||'—')}</td><td class="px-4 py-3 font-mono text-xs text-slate-400">${esc((a.userId||'').slice(0,12))}…</td><td class="px-4 py-3 font-mono text-xs text-slate-400">${esc(a.ipAddress||'—')}</td><td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold ${sevBadge(a.severity)}">${esc(a.severity||'—')}</span></td><td class="px-4 py-3 text-xs text-slate-600 max-w-xs truncate">${esc(a.description||'—')}</td></tr>`).join('');
+    setLastUpdated();
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-red-500">Error: ${esc(e.message)}</td></tr>`; }
+}
+
+async function loadActiveSessions() {
+  const tbody = document.getElementById('sessions-tbody');
+  const badge = document.getElementById('sessions-count-badge');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-sm text-slate-400"><span class="inline-block w-4 h-4 border-2 border-slate-200 border-t-brand-500 rounded-full spin mr-2"></span>Loading…</td></tr>';
+  try {
+    const res = await api('GET', '/api/v1/admin/analytics/active-sessions');
+    const sessions = res.data?.sessions || [];
+    const total = res.data?.total || 0;
+
+    // Update badge count
+    if (badge) {
+      badge.textContent = `${total} active`;
+      badge.classList.remove('hidden');
+    }
+
+    if (!sessions.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-sm text-slate-400">No active admin sessions</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = sessions.map(s => `
+      <tr class="hover:bg-slate-50/70 transition-colors ${s.email === adminInfo?.email ? 'bg-brand-50/40' : ''}">
+        <td class="px-6 py-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold shrink-0">${(s.email||'A')[0].toUpperCase()}</div>
+            <span class="text-sm font-medium text-slate-800">${esc(s.email)}${s.email===adminInfo?.email?' <span class="text-xs text-brand-500">(you)</span>':''}</span>
+          </div>
+        </td>
+        <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${s.adminLevel==='SUPER_ADMIN'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${esc(s.adminLevel||'ADMIN')}</span></td>
+        <td class="px-4 py-3 font-mono text-xs text-slate-500">${esc(s.ipAddress||'—')}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${esc(s.deviceInfo?.platform||s.deviceInfo?.browser||'—')}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${fmtDate(s.loginAt)}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${fmtDate(s.lastActivityAt)}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${fmtDate(s.expiresAt)}</td>
+      </tr>`).join('');
+
+    setLastUpdated();
+  } catch(e) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-sm text-red-500">Error: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+/* ── SETTINGS ── */
+async function loadSettings() {
+  document.getElementById('api-url-input').value=API_BASE;
+  try { const r=await api('GET','/api/v1/admin/analytics/health'); if(r.success) renderSysInfo(r.data?.health||{}); } catch(_){}
+}
+function renderSysInfo(h={}) {
+  // renderSysInfo() is only called when the API health check succeeds (r.success === true),
+  // so "🟢 Online" is accurate. Database status and error rate come directly from the backend.
+  const dbColor = h.databaseStatus === 'HEALTHY' ? 'text-emerald-600' : h.databaseStatus ? 'text-red-500' : 'text-slate-400';
+  document.getElementById('system-info-grid').innerHTML=`
+    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center"><p class="text-xs text-slate-500 uppercase tracking-wide mb-2">API Status</p><p class="font-bold text-emerald-600 text-sm">🟢 Online</p></div>
+    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center"><p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Database</p><p class="font-bold ${dbColor} text-sm">${h.databaseStatus||'—'}</p></div>
+    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center"><p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Error Rate</p><p class="font-bold text-slate-700 text-sm">${h.errorRate||'—'}</p></div>
+    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center"><p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Last Check</p><p class="font-bold text-slate-700 text-xs">${fmtDate(h.lastCheck)}</p></div>`;
+}
+function saveApiUrl() { const u=document.getElementById('api-url-input').value.trim().replace(/\/$/,''); if(!u){toast('Enter a valid URL','error');return;} API_BASE=u; localStorage.setItem('gt_api_url',u); toast('API URL saved','success'); }
+async function testConnection() {
+  const el=document.getElementById('api-test-result');
+  el.innerHTML='<span class="inline-block w-3 h-3 border-2 border-slate-300 border-t-blue-500 rounded-full spin mr-2"></span>Testing…';
+  try { const r=await fetch(`${API_BASE}/`,{signal:AbortSignal.timeout(5000)}); const j=await r.json(); el.innerHTML=`<span class="text-emerald-600 font-medium">✓ Connected — ${esc(j.message||'OK')}</span>`; } catch(e){ el.innerHTML=`<span class="text-red-500 font-medium">✗ Failed: ${esc(e.message)}</span>`; }
+}
+async function createNewAdmin() {
+  const email=document.getElementById('new-admin-email').value.trim(), pass=document.getElementById('new-admin-password').value, level=document.getElementById('new-admin-level').value, dept=document.getElementById('new-admin-dept').value.trim();
+  if(!email||!pass){toast('Email and password are required','error');return;} if(pass.length<8){toast('Password must be at least 8 characters','error');return;}
+  try{ const r=await api('POST','/api/v1/admin/auth/create-admin',{email,password:pass,adminLevel:level,department:dept}); if(!r.success)throw new Error(r.message); toast('Admin account created successfully','success'); ['new-admin-email','new-admin-password','new-admin-dept'].forEach(id=>document.getElementById(id).value=''); }catch(e){toast('Error: '+e.message,'error');}
+}
+
+/* ── MODALS ── */
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+// CRITICAL: Clicking the dark backdrop (outside the modal box) also closes the modal.
+// This works by checking if the click target IS the modal container itself (not a child inside it).
+document.querySelectorAll('[id$="-modal"]').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(m.id); }));
+// CRITICAL: showConfirm() is the reusable "Are you sure?" dialog used for suspend,
+// reactivate, and delete. The onConfirm callback is what actually runs the API call
+// after the user clicks the confirm button. showReason=true adds an optional reason field.
+function showConfirm(title, message, showReason, onConfirm) {
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-message').innerHTML=message;
+  document.getElementById('confirm-reason-group').classList.toggle('hidden',!showReason);
+  document.getElementById('confirm-reason').value='';
+  document.getElementById('confirm-ok-btn').onclick=async()=>{ const reason=document.getElementById('confirm-reason').value.trim(); closeModal('confirm-modal'); await onConfirm(reason); };
+  openModal('confirm-modal');
+}
+
+/* ── TOAST ── */
+function toast(msg, type='info') {
+  const colors={ success:'border-emerald-500 text-emerald-700', error:'border-red-500 text-red-700', warning:'border-amber-500 text-amber-700', info:'border-brand-500 text-brand-700' };
+  const icons={ success:'✓', error:'✕', warning:'⚠', info:'ℹ' };
+  const el=document.createElement('div');
+  el.className=`pointer-events-auto bg-white border-l-4 ${colors[type]||colors.info} rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 min-w-[280px] max-w-sm slide-in`;
+  el.innerHTML=`<span class="font-bold text-base">${icons[type]||'ℹ'}</span><span class="text-sm font-medium text-slate-700 flex-1">${esc(msg)}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(), 4000);
+}
+
+/* ── HELPERS ── */
+// num(): formats numbers with commas e.g. 1000 → "1,000"
+function num(n){ return (n!=null&&n!==undefined)?Number(n).toLocaleString():'0'; }
+
+function fmtDate(val) {
+  if (!val) return '—';
+  try {
+    let d;
+    if (val && typeof val === 'object') {
+      // Firestore Timestamp serialized as { _seconds, _nanoseconds } or { seconds, nanoseconds }
+      const secs = val._seconds ?? val.seconds;
+      if (secs !== undefined) { d = new Date(secs * 1000); }
+      else if (val.toDate)   { d = val.toDate(); }
+      else                   { d = new Date(val); }
+    } else {
+      d = new Date(val);
+    }
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('en-US',{ month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch { return '—'; }
+}
+function fmtDateShort(val) {
+  if (!val) return '—';
+  try {
+    let d;
+    if (val && typeof val === 'object') {
+      const secs = val._seconds ?? val.seconds;
+      if (secs !== undefined) d = new Date(secs * 1000);
+      else if (val.toDate)   d = val.toDate();
+      else                   d = new Date(val);
+    } else { d = new Date(val); }
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-US',{ month:'short', day:'numeric', year:'numeric' });
+  } catch { return '—'; }
+}
+// CRITICAL SECURITY: esc() prevents XSS (Cross-Site Scripting) attacks.
+// Any text from the database or API that gets inserted into the HTML MUST pass through
+// esc() first. It converts dangerous characters like < > & into safe HTML entities
+// so a user can't inject malicious scripts into the page through their name or email.
+function esc(str){ const d=document.createElement('div'); d.appendChild(document.createTextNode(str==null?'':String(str))); return d.innerHTML; }
+function roleBadge(r){ return ({Admin:'bg-purple-100 text-purple-700',Manager:'bg-blue-100 text-blue-700',Farmer:'bg-emerald-100 text-emerald-700'})[r]||'bg-slate-100 text-slate-600'; }
+function actionBadge(a){ return ({CREATE:'bg-blue-100 text-blue-700',DELETE:'bg-red-100 text-red-700',UPDATE:'bg-amber-100 text-amber-700',READ:'bg-slate-100 text-slate-600',LOGIN:'bg-emerald-100 text-emerald-700'})[a]||'bg-slate-100 text-slate-600'; }
+function sevBadge(s){ return ({CRITICAL:'bg-red-100 text-red-700',HIGH:'bg-orange-100 text-orange-700',MEDIUM:'bg-amber-100 text-amber-700',LOW:'bg-blue-100 text-blue-700'})[s]||'bg-slate-100 text-slate-600'; }
+</script>
+
+</body>
+</html>
