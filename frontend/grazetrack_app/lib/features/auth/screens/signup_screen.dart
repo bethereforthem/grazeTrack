@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../auth_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -44,7 +45,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         context.go('/dashboard');
       } else {
         final error = ref.read(authProvider).error;
-        AppUtils.showSnackBar(context, error ?? 'Registration failed', isError: true);
+        final l10n = AppLocalizations.of(context);
+        AppUtils.showSnackBar(context, error ?? l10n.createAccount, isError: true);
       }
     }
   }
@@ -52,6 +54,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -59,7 +62,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         backgroundColor: Colors.white,
         foregroundColor: AppTheme.primaryGreen,
         elevation: 0,
-        title: const Text('Create Account'),
+        title: Text(l10n.createAccount),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -72,12 +75,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 // ─── Full Name ─────────────────────────────────
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.fullName,
+                    prefixIcon: const Icon(Icons.person_outlined),
                   ),
                   validator: (val) =>
-                      (val == null || val.isEmpty) ? 'Name is required' : null,
+                      (val == null || val.isEmpty) ? l10n.nameRequired : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -85,13 +88,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.emailAddress,
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   validator: (val) {
-                    if (val == null || val.isEmpty) return 'Email is required';
-                    if (!val.contains('@')) return 'Enter a valid email';
+                    if (val == null || val.isEmpty) return l10n.emailRequired;
+                    if (!val.contains('@')) return l10n.emailInvalid;
                     return null;
                   },
                 ),
@@ -101,14 +104,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    hintText: 'e.g. 0241234567',
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    hintText: l10n.phoneHint,
                   ),
                   validator: (val) {
-                    if (val == null || val.isEmpty) return 'Phone number is required';
-                    if (val.length < 7) return 'Enter a valid phone number';
+                    if (val == null || val.isEmpty) return l10n.phoneRequired;
+                    if (val.length < 7) return l10n.phoneInvalid;
                     return null;
                   },
                 ),
@@ -119,7 +122,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword
@@ -130,14 +133,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                   ),
                   validator: (val) {
-                    if (val == null || val.isEmpty) return 'Password is required';
-                    if (val.length < 6) return 'Min 6 characters';
+                    if (val == null || val.isEmpty) return l10n.passwordRequired;
+                    if (val.length < 6) return l10n.passwordMinLength;
                     return null;
                   },
                 ),
                 const SizedBox(height: 8),
 
-                // ─── Role note (informational, not selectable) ─
+                // ─── Role note ─────────────────────────────────
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
@@ -145,14 +148,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppTheme.primaryGreen.withAlpha(60)),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: AppTheme.primaryGreen),
-                      SizedBox(width: 8),
+                      const Icon(Icons.info_outline, size: 16, color: AppTheme.primaryGreen),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'You will be registered as a Farmer.',
-                          style: TextStyle(
+                          l10n.registeredAsFarmer,
+                          style: const TextStyle(
                               fontSize: 12,
                               color: AppTheme.primaryGreen,
                               fontWeight: FontWeight.w500),
@@ -173,7 +176,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2),
                         )
-                      : const Text('Create Account'),
+                      : Text(l10n.createAccount),
                 ),
                 const SizedBox(height: 16),
 
@@ -181,12 +184,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Already have an account? '),
+                    Text('${l10n.alreadyHaveAccount} '),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.login,
+                        style: const TextStyle(
                           color: AppTheme.primaryGreen,
                           fontWeight: FontWeight.bold,
                         ),
