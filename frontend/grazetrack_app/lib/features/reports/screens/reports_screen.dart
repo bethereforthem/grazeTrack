@@ -6,6 +6,7 @@ import '../../health/providers/health_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../animals/providers/animal_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
@@ -24,7 +25,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     });
   }
 
-  // ─── Date range picker + load filtered report ────────────────────────────
   Future<void> _pickDateRange() async {
     final state = ref.read(reportProvider);
     final initialRange = (state.startDate != null && state.endDate != null)
@@ -58,10 +58,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     }
   }
 
-  // ─── Critical incident report dialog ────────────────────────────────────
   Future<void> _showIncidentReportDialog() async {
     final animals = ref.read(animalProvider).animals;
-
     await showDialog(
       context: context,
       builder: (ctx) => _IncidentReportDialog(animals: animals),
@@ -71,12 +69,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(reportProvider);
+    final l10n = AppLocalizations.of(context);
     final r = state.report;
     final hasDateFilter = state.startDate != null || state.endDate != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reports & Analytics'),
+        title: Text(l10n.reportsAnalyticsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -97,17 +96,15 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ─── Action buttons row ─────────────────────
                         Row(
                           children: [
-                            // PDF with date range
                             Expanded(
                               child: _ActionButton(
                                 icon: Icons.picture_as_pdf_outlined,
-                                label: 'Generate PDF',
+                                label: l10n.generatePdf,
                                 sublabel: hasDateFilter
                                     ? '${AppUtils.formatDate(state.startDate!.toIso8601String())} – ${AppUtils.formatDate(state.endDate!.toIso8601String())}'
-                                    : 'All time',
+                                    : l10n.allTime,
                                 color: AppTheme.primaryGreen,
                                 onTap: () async {
                                   await _pickDateRange();
@@ -125,12 +122,11 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            // Critical incident report
                             Expanded(
                               child: _ActionButton(
                                 icon: Icons.warning_amber_rounded,
-                                label: 'Report Incident',
-                                sublabel: 'Log incident in the system',
+                                label: l10n.reportIncidentTitle,
+                                sublabel: l10n.logIncidentSystem,
                                 color: Colors.red[700]!,
                                 onTap: _showIncidentReportDialog,
                               ),
@@ -138,7 +134,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           ],
                         ),
 
-                        // ─── Date filter chip ───────────────────────
                         if (hasDateFilter) ...[
                           const SizedBox(height: 10),
                           Row(
@@ -147,7 +142,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                                   size: 14, color: Colors.grey),
                               const SizedBox(width: 4),
                               Text(
-                                'Filtered: ${AppUtils.formatDate(state.startDate?.toIso8601String() ?? '')} – ${AppUtils.formatDate(state.endDate?.toIso8601String() ?? '')}',
+                                '${l10n.filtered}: ${AppUtils.formatDate(state.startDate?.toIso8601String() ?? '')} – ${AppUtils.formatDate(state.endDate?.toIso8601String() ?? '')}',
                                 style: const TextStyle(
                                     fontSize: 12, color: Colors.grey),
                               ),
@@ -158,8 +153,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                                     .clearDateFilter(),
                                 icon: const Icon(Icons.close,
                                     size: 14, color: Colors.grey),
-                                label: const Text('Clear',
-                                    style: TextStyle(
+                                label: Text(l10n.clear,
+                                    style: const TextStyle(
                                         fontSize: 12, color: Colors.grey)),
                                 style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
@@ -173,13 +168,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                         const SizedBox(height: 20),
 
-                        // ─── Summary Cards ──────────────────────────
-                        const _SectionTitle('Farm Summary'),
+                        _SectionTitle(l10n.farmSummary),
                         const SizedBox(height: 8),
                         Row(
                           children: [
                             _SummaryCard(
-                              'Total Revenue',
+                              l10n.totalRevenue,
                               AppUtils.formatCurrency(
                                   (r['totalRevenue'] ?? 0).toDouble()),
                               Icons.trending_up,
@@ -187,7 +181,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                             ),
                             const SizedBox(width: 12),
                             _SummaryCard(
-                              'Total Costs',
+                              l10n.totalCosts,
                               AppUtils.formatCurrency(
                                   (r['totalCosts'] ?? 0).toDouble()),
                               Icons.trending_down,
@@ -199,7 +193,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         Row(
                           children: [
                             _SummaryCard(
-                              'Net Profit',
+                              l10n.netProfit,
                               AppUtils.formatCurrency(
                                   (r['totalProfit'] ?? 0).toDouble()),
                               Icons.account_balance_wallet_outlined,
@@ -209,7 +203,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                             ),
                             const SizedBox(width: 12),
                             _SummaryCard(
-                              'Overall ROI',
+                              l10n.overallRoi,
                               '${r['overallROI'] ?? 0}%',
                               Icons.pie_chart_outline,
                               AppTheme.primaryGreen,
@@ -220,14 +214,14 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         Row(
                           children: [
                             _SummaryCard(
-                              'Profitable Sales',
+                              l10n.profitableSalesLabel,
                               '${r['profitableAnimals'] ?? 0}',
                               Icons.check_circle_outline,
                               AppTheme.profitGreen,
                             ),
                             const SizedBox(width: 12),
                             _SummaryCard(
-                              'Loss Sales',
+                              l10n.lossSalesLabel,
                               '${r['lossAnimals'] ?? 0}',
                               Icons.cancel_outlined,
                               AppTheme.lossRed,
@@ -237,19 +231,20 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ─── Monthly Trend Chart ────────────────────
-                        const _SectionTitle('Monthly Revenue vs Expenses'),
+                        _SectionTitle(l10n.monthlyRevenueVsExpenses),
                         const SizedBox(height: 8),
                         _MonthlyChart(
-                            monthlyTrend: r['monthlyTrend'] as List? ?? []),
+                            monthlyTrend: r['monthlyTrend'] as List? ?? [],
+                            revenueLegend: l10n.revenueLegend,
+                            expensesLegend: l10n.expenses),
 
                         const SizedBox(height: 24),
 
-                        // ─── Expense Breakdown ──────────────────────
-                        const _SectionTitle('Expense Breakdown'),
+                        _SectionTitle(l10n.expenseBreakdown),
                         const SizedBox(height: 8),
                         _ExpenseBreakdown(
-                            expenseByType: r['expenseByType'] as Map? ?? {}),
+                            expenseByType: r['expenseByType'] as Map? ?? {},
+                            noDataYet: l10n.noExpensesYet),
 
                         const SizedBox(height: 24),
                       ],
@@ -260,7 +255,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   }
 }
 
-// ─── Action button card ───────────────────────────────────────────────────
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -309,7 +303,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-// ─── Critical Incident Report dialog ─────────────────────────────────────
 class _IncidentReportDialog extends ConsumerStatefulWidget {
   final List animals;
   const _IncidentReportDialog({required this.animals});
@@ -333,8 +326,9 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
   }
 
   Future<void> _submitIncident() async {
+    final l10n = AppLocalizations.of(context);
     if (_selectedAnimalId == null) {
-      AppUtils.showSnackBar(context, 'Please select an animal', isError: true);
+      AppUtils.showSnackBar(context, l10n.pleaseSelectAnimal, isError: true);
       return;
     }
     setState(() => _submitting = true);
@@ -383,12 +377,12 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
       Navigator.of(context).pop();
       AppUtils.showSnackBar(
         context,
-        'Incident reported for $selectedAnimalName',
+        l10n.incidentReportedFor(selectedAnimalName),
       );
     } else {
       AppUtils.showSnackBar(
         context,
-        'Failed to report incident',
+        l10n.failedToReportIncident,
         isError: true,
       );
     }
@@ -396,12 +390,13 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Row(
         children: [
           Icon(Icons.warning_amber_rounded, color: Colors.red[700], size: 22),
           const SizedBox(width: 8),
-          const Text('Report Incident'),
+          Text(l10n.reportIncidentTitle),
         ],
       ),
       content: Form(
@@ -411,9 +406,8 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Incident type
-              const Text('Incident Type',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(l10n.incidentTypeLabel,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 4),
               DropdownButtonFormField<String>(
                 initialValue: _incidentType,
@@ -423,7 +417,7 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-                items: [
+                items: const [
                   'Deceased',
                   'Critical Illness',
                   'Injury',
@@ -436,13 +430,12 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
               ),
               const SizedBox(height: 12),
 
-              // Animal selector
-              const Text('Select Animal',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(l10n.selectAnimalRequired,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 4),
               DropdownButtonFormField<String>(
                 initialValue: _selectedAnimalId,
-                hint: const Text('Choose an animal…'),
+                hint: Text(l10n.chooseAnimal),
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.pets),
                   isDense: true,
@@ -462,24 +455,23 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
                     .toList(),
                 onChanged: (v) => setState(() => _selectedAnimalId = v),
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Please select an animal'
+                    ? l10n.pleaseSelectAnimal
                     : null,
               ),
               const SizedBox(height: 12),
 
-              // Description
-              const Text('Description',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(l10n.notesDescription,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 4),
               TextField(
                 controller: _descController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Describe the incident…',
-                  prefixIcon: Icon(Icons.notes),
+                decoration: InputDecoration(
+                  hintText: l10n.describeIncidentHint,
+                  prefixIcon: const Icon(Icons.notes),
                   isDense: true,
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
               ),
             ],
@@ -489,7 +481,7 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
@@ -511,14 +503,13 @@ class _IncidentReportDialogState extends ConsumerState<_IncidentReportDialog> {
                       color: Colors.white, strokeWidth: 2),
                 )
               : const Icon(Icons.report_outlined, size: 16),
-          label: const Text('Submit Report'),
+          label: Text(l10n.submitReportLabel),
         ),
       ],
     );
   }
 }
 
-// ─── Section title ─────────────────────────────────────────────────────────
 class _SectionTitle extends StatelessWidget {
   final String title;
   const _SectionTitle(this.title);
@@ -530,7 +521,6 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-// ─── Summary card ──────────────────────────────────────────────────────────
 class _SummaryCard extends StatelessWidget {
   final String title;
   final String value;
@@ -570,19 +560,26 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-// ─── Monthly chart ─────────────────────────────────────────────────────────
 class _MonthlyChart extends StatelessWidget {
   final List monthlyTrend;
-  const _MonthlyChart({required this.monthlyTrend});
+  final String revenueLegend;
+  final String expensesLegend;
+  const _MonthlyChart({
+    required this.monthlyTrend,
+    required this.revenueLegend,
+    required this.expensesLegend,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (monthlyTrend.isEmpty) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Center(
-              child: Text('No data yet', style: TextStyle(color: Colors.grey))),
+              child: Text(l10n.noDataYet,
+                  style: const TextStyle(color: Colors.grey))),
         ),
       );
     }
@@ -602,12 +599,11 @@ class _MonthlyChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Legend
-            const Row(
+            Row(
               children: [
-                _LegendDot(AppTheme.primaryGreen, 'Revenue'),
-                SizedBox(width: 16),
-                _LegendDot(AppTheme.warningOrange, 'Expenses'),
+                _LegendDot(AppTheme.primaryGreen, revenueLegend),
+                const SizedBox(width: 16),
+                _LegendDot(AppTheme.warningOrange, expensesLegend),
               ],
             ),
             const SizedBox(height: 12),
@@ -695,20 +691,21 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-// ─── Expense breakdown ──────────────────────────────────────────────────────
 class _ExpenseBreakdown extends StatelessWidget {
   final Map expenseByType;
-  const _ExpenseBreakdown({required this.expenseByType});
+  final String noDataYet;
+  const _ExpenseBreakdown(
+      {required this.expenseByType, required this.noDataYet});
 
   @override
   Widget build(BuildContext context) {
     if (expenseByType.isEmpty) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Center(
-              child: Text('No expenses yet',
-                  style: TextStyle(color: Colors.grey))),
+              child: Text(noDataYet,
+                  style: const TextStyle(color: Colors.grey))),
         ),
       );
     }
