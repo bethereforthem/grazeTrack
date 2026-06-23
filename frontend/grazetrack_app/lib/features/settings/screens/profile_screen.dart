@@ -7,6 +7,7 @@ import '../../../core/services/auth_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -52,7 +53,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'name': _nameController.text.trim(),
         'phone': _phoneController.text.trim(),
       });
-      // Persist updated data locally so it loads correctly next time
       final updatedUser = response.data['data'] as Map<String, dynamic>?;
       if (updatedUser != null) {
         final prefs = await SharedPreferences.getInstance();
@@ -61,10 +61,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         current['phone'] = updatedUser['phone'] ?? _phoneController.text.trim();
         await prefs.setString(AppConstants.userKey, jsonEncode(current));
       }
-      if (mounted) AppUtils.showSnackBar(context, 'Profile updated!');
+      if (mounted) {
+        AppUtils.showSnackBar(context,
+            AppLocalizations.of(context).profileUpdatedSuccess);
+      }
     } catch (e) {
       if (mounted) {
-        AppUtils.showSnackBar(context, 'Update failed', isError: true);
+        AppUtils.showSnackBar(context,
+            AppLocalizations.of(context).updateFailed,
+            isError: true);
       }
     }
     setState(() => _isLoading = false);
@@ -79,15 +84,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              // ─── Avatar ────────────────────────────────
               const CircleAvatar(
                 radius: 48,
                 backgroundColor: AppTheme.backgroundGreen,
@@ -110,23 +115,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 32),
 
-              // ─── Form Fields ────────────────────────────
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.fullName,
+                  prefixIcon: const Icon(Icons.person_outlined),
                 ),
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Name required' : null,
+                    (val == null || val.isEmpty) ? l10n.nameRequiredError : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  prefixIcon: Icon(Icons.phone_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.phoneNumber,
+                  prefixIcon: const Icon(Icons.phone_outlined),
                 ),
               ),
               const SizedBox(height: 32),
@@ -141,7 +145,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Save Changes'),
+                    : Text(l10n.saveChanges),
               ),
             ],
           ),
