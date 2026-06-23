@@ -5,6 +5,7 @@ import '../providers/expense_provider.dart';
 import '../../animals/providers/animal_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddExpenseScreen extends ConsumerStatefulWidget {
   const AddExpenseScreen({super.key});
@@ -48,11 +49,12 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     setState(() => _isLoading = false);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(context, 'Expense recorded!');
+        AppUtils.showSnackBar(context, l10n.expenseRecorded);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to record expense', isError: true);
+        AppUtils.showSnackBar(context, l10n.expenseRecordFailed, isError: true);
       }
     }
   }
@@ -60,12 +62,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     final animalState = ref.watch(animalProvider);
+    final l10n = AppLocalizations.of(context);
     final activeAnimals = animalState.animals
         .where((a) => a.status == 'active')
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Record Expense')),
+      appBar: AppBar(title: Text(l10n.recordExpenseTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -75,9 +78,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             children: [
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Expense Type *',
-                  prefixIcon: Icon(Icons.category_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.expenseTypeRequired,
+                  prefixIcon: const Icon(Icons.category_outlined),
                 ),
                 items: AppConstants.expenseTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -87,23 +90,23 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description *',
-                  prefixIcon: Icon(Icons.description_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.descriptionRequired,
+                  prefixIcon: const Icon(Icons.description_outlined),
                 ),
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Required' : null,
+                    (val == null || val.isEmpty) ? l10n.required : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Amount (\$) *',
-                  prefixIcon: Icon(Icons.attach_money),
+                decoration: InputDecoration(
+                  labelText: l10n.amountRequired,
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Amount required' : null,
+                    (val == null || val.isEmpty) ? l10n.amountRequiredValidator : null,
               ),
               const SizedBox(height: 12),
               if (animalState.isLoading)
@@ -111,13 +114,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
               else
                 DropdownButtonFormField<String>(
                   initialValue: _selectedAnimalId,
-                  decoration: const InputDecoration(
-                    labelText: 'Link to Animal (optional)',
-                    prefixIcon: Icon(Icons.pets),
+                  decoration: InputDecoration(
+                    labelText: l10n.linkToAnimal,
+                    prefixIcon: const Icon(Icons.pets),
                   ),
-                  hint: const Text('Select an animal (optional)'),
+                  hint: Text(l10n.selectAnimalOptional),
                   items: [
-                    const DropdownMenuItem(value: '', child: Text('None')),
+                    DropdownMenuItem(value: '', child: Text(l10n.none)),
                     ...activeAnimals.map((a) {
                       final label = a.name.isNotEmpty
                           ? '${a.name} (${a.type})'
@@ -137,7 +140,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Save Expense'),
+                    : Text(l10n.saveExpense),
               ),
             ],
           ),
