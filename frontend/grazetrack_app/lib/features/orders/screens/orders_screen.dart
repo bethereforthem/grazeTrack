@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../orders_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
@@ -42,15 +43,16 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(ordersProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Text(l10n.ordersTitle),
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [
-            Tab(text: 'As Buyer'),
-            Tab(text: 'As Seller'),
+          tabs: [
+            Tab(text: l10n.asBuyer),
+            Tab(text: l10n.asSeller),
           ],
         ),
       ),
@@ -91,6 +93,8 @@ class _OrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     if (orders.isEmpty) {
       return Center(
         child: Column(
@@ -100,7 +104,7 @@ class _OrderList extends StatelessWidget {
                 size: 64, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
-              isSeller ? 'No orders on your listings' : 'No orders yet',
+              isSeller ? l10n.noOrdersOnListings : l10n.noOrders,
               style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             if (!isSeller) ...[
@@ -108,7 +112,7 @@ class _OrderList extends StatelessWidget {
               TextButton.icon(
                 onPressed: () => context.go('/marketplace'),
                 icon: const Icon(Icons.storefront_outlined),
-                label: const Text('Browse Marketplace'),
+                label: Text(l10n.browseMarketplace),
               ),
             ],
           ],
@@ -148,6 +152,7 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final status = order['status'] ?? 'Pending';
     final payStatus = order['paymentStatus'] ?? 'Unpaid';
     final color = _statusColor(status);
@@ -178,8 +183,8 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 isSeller
-                    ? 'Buyer: ${order['buyerName'] ?? ''}'
-                    : 'Seller: ${order['sellerName'] ?? ''}',
+                    ? '${l10n.buyerLabel}: ${order['buyerName'] ?? ''}'
+                    : '${l10n.sellerLabel}: ${order['sellerName'] ?? ''}',
                 style: const TextStyle(color: Colors.grey, fontSize: 13),
               ),
               const SizedBox(height: 4),
@@ -200,7 +205,6 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-              // Show Pay button for approved + unpaid buyer orders
               if (!isSeller &&
                   status == 'Approved' &&
                   payStatus == 'Unpaid') ...[
@@ -211,7 +215,7 @@ class _OrderCard extends StatelessWidget {
                     onPressed: () =>
                         context.push('/payment/${order['id']}', extra: order),
                     icon: const Icon(Icons.payment, size: 18),
-                    label: const Text('Pay Now via MoMo'),
+                    label: Text(l10n.payNowViaMoMo),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrange,
                       shape: RoundedRectangleBorder(
