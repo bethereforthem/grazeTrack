@@ -8,14 +8,7 @@ import '../../../core/services/auth_service.dart';
 import '../../../core/services/api_service.dart';
 import '../../auth/auth_provider.dart';
 import '../../notifications/notification_provider.dart';
-
-// ─── Dashboard — Home Screen ──────────────────────────────────────────────────
-//
-// The first screen after login. Shows:
-//   • Farm stats (animals, revenue, expenses, profit)
-//   • Quick action buttons (Add Animal, Record Feed, etc.)
-//   • Marketplace preview (latest 3 listings)
-//   • Navigation shortcuts (Chat, Settings)
+import '../../../l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -47,7 +40,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  // Load the 3 most recent marketplace listings for the dashboard preview
   Future<void> _loadLatestListings() async {
     try {
       final res = await ApiService().get('/listings');
@@ -55,7 +47,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       final all = List<Map<String, dynamic>>.from(data['data'] ?? []);
       if (mounted) {
         setState(() {
-          // Show only the first 3 listings
           _latestListings = all.take(3).toList();
           _listingsLoading = false;
         });
@@ -65,19 +56,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  // Get a friendly greeting based on the time of day
-  String get _greeting {
+  String _greeting(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return l10n.goodMorning;
+    if (hour < 17) return l10n.goodAfternoon;
+    return l10n.goodEvening;
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dashboardProvider);
-    final unreadCount = ref.watch(
-        notificationProvider.select((s) => s.unreadCount));
+    final unreadCount =
+        ref.watch(notificationProvider.select((s) => s.unreadCount));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: RefreshIndicator(
@@ -109,14 +100,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            '$_greeting,',
+                            '${_greeting(l10n)},',
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                             ),
                           ),
                           Text(
-                            _userName.isEmpty ? 'Farmer' : _userName,
+                            _userName.isEmpty ? l10n.farmerDefault : _userName,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -124,10 +115,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Here\'s your farm overview, stay updated',
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 13),
+                          Text(
+                            l10n.farmOverview,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 13),
                           ),
                         ],
                       ),
@@ -136,7 +127,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               actions: [
-                // Notification bell with unread badge
                 Badge(
                   isLabelVisible: unreadCount > 0,
                   label: Text('$unreadCount'),
@@ -147,7 +137,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     onPressed: () => context.push('/notifications'),
                   ),
                 ),
-                // Profile menu
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.person_outline, color: Colors.white),
                   onSelected: (value) async {
@@ -156,9 +145,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     } else if (value == 'logout') {
                       final confirm = await AppUtils.showConfirmDialog(
                         context,
-                        title: 'Logout',
-                        message: 'Are you sure you want to logout?',
-                        confirmText: 'Logout',
+                        title: l10n.logout,
+                        message: l10n.logoutConfirm,
+                        confirmText: l10n.logout,
                       );
                       if (confirm && context.mounted) {
                         await ref.read(authProvider.notifier).logout();
@@ -166,20 +155,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       }
                     }
                   },
-                  itemBuilder: (_) => const [
+                  itemBuilder: (_) => [
                     PopupMenuItem(
                         value: 'profile',
                         child: Row(children: [
-                          Icon(Icons.person_outlined, size: 20),
-                          SizedBox(width: 8),
-                          Text('My Profile')
+                          const Icon(Icons.person_outlined, size: 20),
+                          const SizedBox(width: 8),
+                          Text(l10n.myProfile),
                         ])),
                     PopupMenuItem(
                         value: 'logout',
                         child: Row(children: [
-                          Icon(Icons.logout, size: 20, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Logout', style: TextStyle(color: Colors.red))
+                          const Icon(Icons.logout, size: 20, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(l10n.logout,
+                              style: const TextStyle(color: Colors.red)),
                         ])),
                   ],
                 ),
@@ -208,14 +198,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       childAspectRatio: 1.5,
                       children: [
                         _StatCard(
-                          title: 'Active Animals',
+                          title: l10n.activeAnimals,
                           value: '${state.stats['totalActiveAnimals'] ?? 0}',
                           icon: Icons.pets,
                           color: AppTheme.primaryGreen,
                           onTap: () => context.go('/animals'),
                         ),
                         _StatCard(
-                          title: 'Total Revenue',
+                          title: l10n.totalRevenue,
                           value: AppUtils.formatCurrency(
                               (state.stats['totalRevenue'] ?? 0).toDouble()),
                           icon: Icons.attach_money,
@@ -223,7 +213,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           onTap: () => context.go('/reports'),
                         ),
                         _StatCard(
-                          title: 'Expenses',
+                          title: l10n.expenses,
                           value: AppUtils.formatCurrency(
                               (state.stats['allTimeExpenses'] ?? 0).toDouble()),
                           icon: Icons.receipt_long,
@@ -231,7 +221,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           onTap: () => context.go('/expenses'),
                         ),
                         _StatCard(
-                          title: 'Total Profit',
+                          title: l10n.totalProfit,
                           value: AppUtils.formatCurrency(
                               (state.stats['totalProfit'] ?? 0).toDouble()),
                           icon: Icons.trending_up,
@@ -246,26 +236,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 24),
 
                   // ── Quick Actions ─────────────────────────────
-                  _SectionHeader(title: 'Quick Actions'),
+                  _SectionHeader(title: l10n.quickActions),
                   const SizedBox(height: 12),
                   Row(children: [
                     _ActionButton(
-                        label: 'Add Animal',
+                        label: l10n.addAnimal,
                         icon: Icons.add_circle_outline,
                         onTap: () => context.push('/animals/add')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'Record Feed',
+                        label: l10n.recordFeed,
                         icon: Icons.grass,
                         onTap: () => context.push('/feed/add')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'Health Log',
+                        label: l10n.healthLog,
                         icon: Icons.medical_services_outlined,
                         onTap: () => context.push('/health/add')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'Record Sale',
+                        label: l10n.recordSale,
                         icon: Icons.sell_outlined,
                         onTap: () => context.push('/sales/add')),
                   ]),
@@ -274,29 +264,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                   // ── Marketplace Quick Links ────────────────────
                   _SectionHeader(
-                    title: 'Marketplace',
-                    actionLabel: 'Browse All',
+                    title: l10n.marketplace,
+                    actionLabel: l10n.browseAll,
                     onAction: () => context.go('/marketplace'),
                   ),
                   const SizedBox(height: 12),
                   Row(children: [
                     _ActionButton(
-                        label: 'Browse',
+                        label: l10n.browse,
                         icon: Icons.storefront_outlined,
                         onTap: () => context.go('/marketplace')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'Sell Animal',
+                        label: l10n.sellAnimal,
                         icon: Icons.sell_outlined,
                         onTap: () => context.push('/my-listings/create')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'My Listings',
+                        label: l10n.myListings,
                         icon: Icons.list_alt_outlined,
                         onTap: () => context.push('/my-listings')),
                     const SizedBox(width: 8),
                     _ActionButton(
-                        label: 'My Orders',
+                        label: l10n.myOrders,
                         icon: Icons.receipt_long_outlined,
                         onTap: () => context.push('/orders')),
                   ]),
@@ -304,25 +294,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 24),
 
                   // ── Animal Categories Quick Filter ─────────────
-                  _SectionHeader(title: 'Browse by Category'),
+                  _SectionHeader(title: l10n.browseByCategory),
                   const SizedBox(height: 12),
                   SizedBox(
                     height: 80,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: const [
-                        _CategoryChip(emoji: '🐄', label: 'Cows', type: 'Cow'),
-                        _CategoryChip(
-                            emoji: '🐐', label: 'Goats', type: 'Goat'),
-                        _CategoryChip(
-                            emoji: '🐑', label: 'Sheep', type: 'Sheep'),
-                        _CategoryChip(emoji: '🐖', label: 'Pigs', type: 'Pig'),
-                        _CategoryChip(
-                            emoji: '🐔', label: 'Chickens', type: 'Chicken'),
-                        _CategoryChip(
-                            emoji: '🐴', label: 'Horses', type: 'Horse'),
-                        _CategoryChip(
-                            emoji: '🐪', label: 'Camels', type: 'Camel'),
+                      children: [
+                        _CategoryChip(emoji: '🐄', label: l10n.cowsLabel, type: 'Cow'),
+                        _CategoryChip(emoji: '🐐', label: l10n.goatsLabel, type: 'Goat'),
+                        _CategoryChip(emoji: '🐑', label: l10n.sheepLabel, type: 'Sheep'),
+                        _CategoryChip(emoji: '🐖', label: l10n.pigsLabel, type: 'Pig'),
+                        _CategoryChip(emoji: '🐔', label: l10n.chickensLabel, type: 'Chicken'),
+                        _CategoryChip(emoji: '🐴', label: l10n.horsesLabel, type: 'Horse'),
+                        _CategoryChip(emoji: '🐪', label: l10n.camelsLabel, type: 'Camel'),
                       ],
                     ),
                   ),
@@ -331,15 +316,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                   // ── Latest Marketplace Listings preview ────────
                   _SectionHeader(
-                    title: 'Latest Listings',
-                    actionLabel: 'See All',
+                    title: l10n.latestListings,
+                    actionLabel: l10n.seeAll,
                     onAction: () => context.go('/marketplace'),
                   ),
                   const SizedBox(height: 12),
                   if (_listingsLoading)
                     const Center(child: CircularProgressIndicator())
                   else if (_latestListings.isEmpty)
-                    _EmptyMarketplaceCard()
+                    _EmptyMarketplaceCard(l10n: l10n)
                   else
                     Column(
                       children: _latestListings
@@ -350,24 +335,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 24),
 
                   // ── Navigation shortcuts ───────────────────────
-                  _SectionHeader(title: 'More'),
+                  _SectionHeader(title: l10n.more),
                   const SizedBox(height: 8),
                   _NavTile(
                       icon: Icons.chat_bubble_outline,
-                      label: 'Messages',
-                      subtitle: 'Chat with buyers & sellers',
+                      label: l10n.messages,
+                      subtitle: l10n.chatWithBuyers,
                       onTap: () => context.push('/chat')),
                   const SizedBox(height: 8),
                   _NavTile(
                       icon: Icons.admin_panel_settings_outlined,
-                      label: 'Order Management',
-                      subtitle: 'Admin — view all orders',
+                      label: l10n.orderManagement,
+                      subtitle: l10n.adminOrders,
                       onTap: () => context.push('/orders/admin')),
                   const SizedBox(height: 8),
                   _NavTile(
                       icon: Icons.settings_outlined,
-                      label: 'Settings',
-                      subtitle: 'Profile, currency, preferences',
+                      label: l10n.settings,
+                      subtitle: l10n.profileCurrencyPrefs,
                       onTap: () => context.push('/settings')),
                   const SizedBox(height: 24),
                 ]),
@@ -380,7 +365,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-// ─── Section Header ───────────────────────────────────────────────────────────
 class _SectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
@@ -407,7 +391,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -448,8 +431,7 @@ class _StatCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Icon(icon, color: color, size: 26),
-                Icon(Icons.arrow_forward_ios,
-                    size: 12, color: Colors.grey[400]),
+                Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey[400]),
               ],
             ),
             Column(
@@ -457,9 +439,7 @@ class _StatCard extends StatelessWidget {
               children: [
                 Text(value,
                     style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: color)),
+                        fontSize: 17, fontWeight: FontWeight.bold, color: color)),
                 Text(title,
                     style: const TextStyle(fontSize: 11, color: Colors.grey)),
               ],
@@ -471,8 +451,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ─── Category Chip ────────────────────────────────────────────────────────────
-// Tap these to go to the marketplace pre-filtered by animal type
 class _CategoryChip extends StatelessWidget {
   final String emoji;
   final String label;
@@ -484,10 +462,7 @@ class _CategoryChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
-      onTap: () {
-        // Navigate to marketplace and the user can then filter by type
-        context.go('/marketplace');
-      },
+      onTap: () => context.go('/marketplace'),
       child: Container(
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -516,7 +491,6 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-// ─── Marketplace Preview Tile ─────────────────────────────────────────────────
 class _MarketplacePreviewTile extends StatelessWidget {
   final Map<String, dynamic> listing;
   const _MarketplacePreviewTile({required this.listing});
@@ -533,7 +507,6 @@ class _MarketplacePreviewTile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: Row(
           children: [
-            // Thumbnail
             SizedBox(
               width: 90,
               height: 90,
@@ -543,7 +516,6 @@ class _MarketplacePreviewTile extends StatelessWidget {
                       errorBuilder: (_, __, ___) => _placeholder())
                   : _placeholder(),
             ),
-            // Details
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(10),
@@ -564,8 +536,7 @@ class _MarketplacePreviewTile extends StatelessWidget {
                       const SizedBox(width: 2),
                       Text(
                         listing['farmLocation'] ?? '',
-                        style:
-                            const TextStyle(fontSize: 11, color: Colors.grey),
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
                     ]),
                     const SizedBox(height: 6),
@@ -595,8 +566,10 @@ class _MarketplacePreviewTile extends StatelessWidget {
       );
 }
 
-// ─── Empty Marketplace Card ───────────────────────────────────────────────────
 class _EmptyMarketplaceCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _EmptyMarketplaceCard({required this.l10n});
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -615,16 +588,16 @@ class _EmptyMarketplaceCard extends StatelessWidget {
             const Icon(Icons.storefront_outlined,
                 color: AppTheme.primaryGreen, size: 36),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('No listings yet',
-                      style: TextStyle(
+                  Text(l10n.noListingsYet,
+                      style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryGreen)),
-                  Text('Be the first to sell an animal!',
-                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(l10n.beFirstToSell,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
                 ],
               ),
             ),
@@ -636,7 +609,6 @@ class _EmptyMarketplaceCard extends StatelessWidget {
   }
 }
 
-// ─── Nav Tile ─────────────────────────────────────────────────────────────────
 class _NavTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -669,7 +641,6 @@ class _NavTile extends StatelessWidget {
   }
 }
 
-// ─── Quick Action Button ──────────────────────────────────────────────────────
 class _ActionButton extends StatelessWidget {
   final String label;
   final IconData icon;
