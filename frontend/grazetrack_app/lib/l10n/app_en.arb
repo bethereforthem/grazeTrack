@@ -1,0 +1,1172 @@
+{
+  "@@locale": "en",
+
+  "appName": "GrazeTrack",
+  "@appName": { "description": "Application name" },
+
+  "splashTagline": "Connecting Farmers to\nBetter Livestock Markets",
+  "@splashTagline": { "description": "Splash screen tagline" },
+
+  "smartLivestockManagement": "Smart Livestock Management",
+  "@smartLivestockManagement": { "description": "Login screen subtitle" },
+
+  "emailAddress": "Email Address",
+  "@emailAddress": {},
+
+  "emailRequired": "Email is required",
+  "@emailRequired": {},
+
+  "emailInvalid": "Enter a valid email",
+  "@emailInvalid": {},
+
+  "password": "Password",
+  "@password": {},
+
+  "passwordRequired": "Password is required",
+  "@passwordRequired": {},
+
+  "passwordMinLength": "Min 6 characters",
+  "@passwordMinLength": {},
+
+  "login": "Login",
+  "@login": {},
+
+  "noAccount": "Don't have an account?",
+  "@noAccount": {},
+
+  "signUp": "Sign Up",
+  "@signUp": {},
+
+  "createAccount": "Create Account",
+  "@createAccount": {},
+
+  "fullName": "Full Name",
+  "@fullName": {},
+
+  "nameRequired": "Name is required",
+  "@nameRequired": {},
+
+  "phoneNumber": "Phone Number",
+  "@phoneNumber": {},
+
+  "phoneHint": "e.g. 0241234567",
+  "@phoneHint": {},
+
+  "phoneRequired": "Phone number is required",
+  "@phoneRequired": {},
+
+  "phoneInvalid": "Enter a valid phone number",
+  "@phoneInvalid": {},
+
+  "registeredAsFarmer": "You will be registered as a Farmer.",
+  "@registeredAsFarmer": {},
+
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {},
+
+  "goodMorning": "Good morning",
+  "@goodMorning": {},
+
+  "goodAfternoon": "Good afternoon",
+  "@goodAfternoon": {},
+
+  "goodEvening": "Good evening",
+  "@goodEvening": {},
+
+  "farmerDefault": "Farmer",
+  "@farmerDefault": {},
+
+  "farmOverview": "Here's your farm overview, stay updated",
+  "@farmOverview": {},
+
+  "myProfile": "My Profile",
+  "@myProfile": {},
+
+  "logout": "Logout",
+  "@logout": {},
+
+  "logoutConfirm": "Are you sure you want to logout?",
+  "@logoutConfirm": {},
+
+  "activeAnimals": "Active Animals",
+  "@activeAnimals": {},
+
+  "totalRevenue": "Total Revenue",
+  "@totalRevenue": {},
+
+  "expenses": "Expenses",
+  "@expenses": {},
+
+  "totalProfit": "Total Profit",
+  "@totalProfit": {},
+
+  "quickActions": "Quick Actions",
+  "@quickActions": {},
+
+  "addAnimal": "Add Animal",
+  "@addAnimal": {},
+
+  "recordFeed": "Record Feed",
+  "@recordFeed": {},
+
+  "healthLog": "Health Log",
+  "@healthLog": {},
+
+  "recordSale": "Record Sale",
+  "@recordSale": {},
+
+  "marketplace": "Marketplace",
+  "@marketplace": {},
+
+  "browseAll": "Browse All",
+  "@browseAll": {},
+
+  "browse": "Browse",
+  "@browse": {},
+
+  "sellAnimal": "Sell Animal",
+  "@sellAnimal": {},
+
+  "myListings": "My Listings",
+  "@myListings": {},
+
+  "myOrders": "My Orders",
+  "@myOrders": {},
+
+  "browseByCategory": "Browse by Category",
+  "@browseByCategory": {},
+
+  "cowsLabel": "Cows",
+  "@cowsLabel": {},
+
+  "goatsLabel": "Goats",
+  "@goatsLabel": {},
+
+  "sheepLabel": "Sheep",
+  "@sheepLabel": {},
+
+  "pigsLabel": "Pigs",
+  "@pigsLabel": {},
+
+  "chickensLabel": "Chickens",
+  "@chickensLabel": {},
+
+  "horsesLabel": "Horses",
+  "@horsesLabel": {},
+
+  "camelsLabel": "Camels",
+  "@camelsLabel": {},
+
+  "latestListings": "Latest Listings",
+  "@latestListings": {},
+
+  "seeAll": "See All",
+  "@seeAll": {},
+
+  "noListingsYet": "No listings yet",
+  "@noListingsYet": {},
+
+  "beFirstToSell": "Be the first to sell an animal!",
+  "@beFirstToSell": {},
+
+  "more": "More",
+  "@more": {},
+
+  "messages": "Messages",
+  "@messages": {},
+
+  "chatWithBuyers": "Chat with buyers & sellers",
+  "@chatWithBuyers": {},
+
+  "orderManagement": "Order Management",
+  "@orderManagement": {},
+
+  "adminOrders": "Admin — view all orders",
+  "@adminOrders": {},
+
+  "settings": "Settings",
+  "@settings": {},
+
+  "profileCurrencyPrefs": "Profile, currency, preferences",
+  "@profileCurrencyPrefs": {},
+
+  "myAnimalsCount": "My Animals ({count})",
+  "@myAnimalsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "activeCount": "Active ({count})",
+  "@activeCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "soldCount": "Sold ({count})",
+  "@soldCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "deceasedCount": "Deceased ({count})",
+  "@deceasedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "searchByNameTypeBreed": "Search by name, type, or breed…",
+  "@searchByNameTypeBreed": {},
+
+  "all": "All",
+  "@all": {},
+
+  "clear": "Clear",
+  "@clear": {},
+
+  "noAnimalsInCategory": "No animals in this category",
+  "@noAnimalsInCategory": {},
+
+  "costOfBuying": "Cost of Buying",
+  "@costOfBuying": {},
+
+  "dateOfBuy": "Date of Buy",
+  "@dateOfBuy": {},
+
+  "dateSold": "Date Sold",
+  "@dateSold": {},
+
+  "dateOfDeath": "Date of Death",
+  "@dateOfDeath": {},
+
+  "soldPrice": "Sold Price",
+  "@soldPrice": {},
+
+  "profitLoss": "Profit / Loss",
+  "@profitLoss": {},
+
+  "purchaseCost": "Purchase Cost",
+  "@purchaseCost": {},
+
+  "viewDetails": "View Details",
+  "@viewDetails": {},
+
+  "update": "Update",
+  "@update": {},
+
+  "retry": "Retry",
+  "@retry": {},
+
+  "months": "months",
+  "@months": {},
+
+  "options": "Options",
+  "@options": {},
+
+  "animalTypeRequired": "Animal Type *",
+  "@animalTypeRequired": {},
+
+  "nameTagOptional": "Name / Tag (optional)",
+  "@nameTagOptional": {},
+
+  "breed": "Breed",
+  "@breed": {},
+
+  "gender": "Gender",
+  "@gender": {},
+
+  "male": "Male",
+  "@male": {},
+
+  "female": "Female",
+  "@female": {},
+
+  "ageMonths": "Age (months)",
+  "@ageMonths": {},
+
+  "weightKg": "Weight (kg)",
+  "@weightKg": {},
+
+  "purchaseCostRequired": "Purchase Cost *",
+  "@purchaseCostRequired": {},
+
+  "costRequired": "Cost is required",
+  "@costRequired": {},
+
+  "parentAnimal": "Parent Animal (if born on farm)",
+  "@parentAnimal": {},
+
+  "parentAnimalHelper": "Optional — select if this is a born animal",
+  "@parentAnimalHelper": {},
+
+  "noneOption": "— None —",
+  "@noneOption": {},
+
+  "notesOptional": "Notes (optional)",
+  "@notesOptional": {},
+
+  "animalAddedSuccess": "Animal added successfully!",
+  "@animalAddedSuccess": {},
+
+  "animalAddFailed": "Failed to add animal",
+  "@animalAddFailed": {},
+
+  "recordFeedingTitle": "Record Feeding",
+  "@recordFeedingTitle": {},
+
+  "animalCategoryRequired": "Animal Category *",
+  "@animalCategoryRequired": {},
+
+  "feedTypeRequired": "Feed Type *",
+  "@feedTypeRequired": {},
+
+  "quantityRequired": "Quantity *",
+  "@quantityRequired": {},
+
+  "unit": "Unit",
+  "@unit": {},
+
+  "costWithSymbol": "Cost *",
+  "@costWithSymbol": {},
+
+  "required": "Required",
+  "@required": {},
+
+  "costFieldRequired": "Cost required",
+  "@costFieldRequired": {},
+
+  "feedRecordAdded": "Feed record added!",
+  "@feedRecordAdded": {},
+
+  "feedRecordFailed": "Failed to add feed record",
+  "@feedRecordFailed": {},
+
+  "saveFeedRecord": "Save Feed Record",
+  "@saveFeedRecord": {},
+
+  "feedingRecordsTitle": "Feeding Records",
+  "@feedingRecordsTitle": {},
+
+  "searchFeedingRecords": "Search feeding records…",
+  "@searchFeedingRecords": {},
+
+  "total": "Total",
+  "@total": {},
+
+  "noFeedingRecords": "No feeding records yet",
+  "@noFeedingRecords": {},
+
+  "noRecordsMatchFilter": "No records match your filters",
+  "@noRecordsMatchFilter": {},
+
+  "addHealthRecordTitle": "Add Health Record",
+  "@addHealthRecordTitle": {},
+
+  "selectAnimalRequired": "Select Animal *",
+  "@selectAnimalRequired": {},
+
+  "chooseAnimal": "Choose an animal",
+  "@chooseAnimal": {},
+
+  "pleaseSelectAnimal": "Please select an animal",
+  "@pleaseSelectAnimal": {},
+
+  "recordTypeRequired": "Record Type *",
+  "@recordTypeRequired": {},
+
+  "healthStatusRequired": "Health Status *",
+  "@healthStatusRequired": {},
+
+  "vaccineTreatmentName": "Vaccine / Treatment Name",
+  "@vaccineTreatmentName": {},
+
+  "medicineUsed": "Medicine Used",
+  "@medicineUsed": {},
+
+  "costField": "Cost",
+  "@costField": {},
+
+  "veterinarianName": "Veterinarian Name",
+  "@veterinarianName": {},
+
+  "notesDescription": "Notes / Description",
+  "@notesDescription": {},
+
+  "healthRecordAdded": "Health record added!",
+  "@healthRecordAdded": {},
+
+  "healthRecordFailed": "Failed to save record",
+  "@healthRecordFailed": {},
+
+  "saveHealthRecord": "Save Health Record",
+  "@saveHealthRecord": {},
+
+  "healthRecordsTitle": "Health Records",
+  "@healthRecordsTitle": {},
+
+  "searchHealthRecords": "Search by type, vaccination, vet…",
+  "@searchHealthRecords": {},
+
+  "noHealthRecords": "No health records yet",
+  "@noHealthRecords": {},
+
+  "addRecord": "Add Record",
+  "@addRecord": {},
+
+  "recordExpenseTitle": "Record Expense",
+  "@recordExpenseTitle": {},
+
+  "expenseTypeRequired": "Expense Type *",
+  "@expenseTypeRequired": {},
+
+  "descriptionRequired": "Description *",
+  "@descriptionRequired": {},
+
+  "amountRequired": "Amount *",
+  "@amountRequired": {},
+
+  "amountRequiredValidator": "Amount required",
+  "@amountRequiredValidator": {},
+
+  "linkToAnimal": "Link to Animal (optional)",
+  "@linkToAnimal": {},
+
+  "selectAnimalOptional": "Select an animal (optional)",
+  "@selectAnimalOptional": {},
+
+  "none": "None",
+  "@none": {},
+
+  "expenseRecorded": "Expense recorded!",
+  "@expenseRecorded": {},
+
+  "expenseRecordFailed": "Failed to record expense",
+  "@expenseRecordFailed": {},
+
+  "saveExpense": "Save Expense",
+  "@saveExpense": {},
+
+  "expensesTitle": "Expenses",
+  "@expensesTitle": {},
+
+  "searchExpenses": "Search expenses…",
+  "@searchExpenses": {},
+
+  "noExpensesRecorded": "No expenses recorded",
+  "@noExpensesRecorded": {},
+
+  "noExpensesMatchFilter": "No expenses match your filters",
+  "@noExpensesMatchFilter": {},
+
+  "addExpense": "Add Expense",
+  "@addExpense": {},
+
+  "recordSaleTitle": "Record Sale",
+  "@recordSaleTitle": {},
+
+  "profitAutoCalculated": "Profit/loss is calculated automatically from the animal's purchase cost, feed, and health expenses.",
+  "@profitAutoCalculated": {},
+
+  "sellingPriceRequired": "Selling Price *",
+  "@sellingPriceRequired": {},
+
+  "sellingPriceRequiredValidator": "Selling price required",
+  "@sellingPriceRequiredValidator": {},
+
+  "enterValidNumber": "Enter a valid number",
+  "@enterValidNumber": {},
+
+  "buyerNameOptional": "Buyer Name (optional)",
+  "@buyerNameOptional": {},
+
+  "saleRecordedSuccess": "Sale recorded! Profit calculated automatically.",
+  "@saleRecordedSuccess": {},
+
+  "saleRecordFailed": "Failed to record sale",
+  "@saleRecordFailed": {},
+
+  "recordSaleAndCalculate": "Record Sale & Calculate Profit",
+  "@recordSaleAndCalculate": {},
+
+  "salesTitle": "Sales",
+  "@salesTitle": {},
+
+  "searchSales": "Search by animal, breed, buyer…",
+  "@searchSales": {},
+
+  "noSalesYet": "No sales yet",
+  "@noSalesYet": {},
+
+  "noSalesMatchFilter": "No sales match your filters",
+  "@noSalesMatchFilter": {},
+
+  "totalProfitLabel": "Total Profit",
+  "@totalProfitLabel": {},
+
+  "totalLossLabel": "Total Loss",
+  "@totalLossLabel": {},
+
+  "profitBadge": "PROFIT",
+  "@profitBadge": {},
+
+  "lossBadge": "LOSS",
+  "@lossBadge": {},
+
+  "soldFor": "Sold for",
+  "@soldFor": {},
+
+  "cost": "Cost",
+  "@cost": {},
+
+  "profit": "Profit",
+  "@profit": {},
+
+  "loss": "Loss",
+  "@loss": {},
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {},
+
+  "accountSection": "ACCOUNT",
+  "@accountSection": {},
+
+  "updateNamePhone": "Update your name and phone number",
+  "@updateNamePhone": {},
+
+  "changePassword": "Change Password",
+  "@changePassword": {},
+
+  "updateLoginPassword": "Update your login password",
+  "@updateLoginPassword": {},
+
+  "currencySection": "CURRENCY",
+  "@currencySection": {},
+
+  "displayCurrency": "Display Currency",
+  "@displayCurrency": {},
+
+  "fetchingRates": "(fetching rates...)",
+  "@fetchingRates": {},
+
+  "appSection": "APP",
+  "@appSection": {},
+
+  "notifications": "Notifications",
+  "@notifications": {},
+
+  "manageReminders": "Manage reminders and alerts",
+  "@manageReminders": {},
+
+  "reports": "Reports",
+  "@reports": {},
+
+  "viewAnalytics": "View analytics and insights",
+  "@viewAnalytics": {},
+
+  "networkSection": "NETWORK",
+  "@networkSection": {},
+
+  "serverAddress": "Server Address",
+  "@serverAddress": {},
+
+  "supportSection": "SUPPORT",
+  "@supportSection": {},
+
+  "helpFaq": "Help & FAQ",
+  "@helpFaq": {},
+
+  "getAnswers": "Get answers to common questions",
+  "@getAnswers": {},
+
+  "contactSupport": "Contact Support",
+  "@contactSupport": {},
+
+  "chatEmailCallTeam": "Chat, email, or call our team",
+  "@chatEmailCallTeam": {},
+
+  "appVersion": "App Version",
+  "@appVersion": {},
+
+  "appVersionValue": "GrazeTrack v1.0.0",
+  "@appVersionValue": {},
+
+  "serverAddressInstruction": "Enter your PC's local IP address.\nExample: http://192.168.1.x:5000/api/v1",
+  "@serverAddressInstruction": {},
+
+  "reset": "Reset",
+  "@reset": {},
+
+  "cancel": "Cancel",
+  "@cancel": {},
+
+  "save": "Save",
+  "@save": {},
+
+  "selectCurrency": "Select Currency",
+  "@selectCurrency": {},
+
+  "currencyChanged": "Currency changed to {currency}",
+  "@currencyChanged": {
+    "placeholders": { "currency": { "type": "String" } }
+  },
+
+  "serverAddressUpdated": "Server address updated",
+  "@serverAddressUpdated": {},
+
+  "resetToDefault": "Reset to default: {url}",
+  "@resetToDefault": {
+    "placeholders": { "url": { "type": "String" } }
+  },
+
+  "languageSection": "LANGUAGE",
+  "@languageSection": {},
+
+  "language": "Language",
+  "@language": {},
+
+  "selectAppLanguage": "Select app language",
+  "@selectAppLanguage": {},
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {},
+
+  "english": "English",
+  "@english": {},
+
+  "french": "French",
+  "@french": {},
+
+  "kinyarwanda": "Kinyarwanda",
+  "@kinyarwanda": {},
+
+  "languageChanged": "Language changed",
+  "@languageChanged": {},
+
+  "notifications_title": "Notifications",
+  "@notifications_title": {},
+
+  "noNotifications": "No notifications yet",
+  "@noNotifications": {},
+
+  "markAllRead": "Mark all read",
+  "@markAllRead": {},
+
+  "reportsTitle": "Reports",
+  "@reportsTitle": {},
+
+  "financialSummary": "Financial Summary",
+  "@financialSummary": {},
+
+  "animalHealth": "Animal Health",
+  "@animalHealth": {},
+
+  "feedingSummary": "Feeding Summary",
+  "@feedingSummary": {},
+
+  "salesReport": "Sales Report",
+  "@salesReport": {},
+
+  "generateReport": "Generate Report",
+  "@generateReport": {},
+
+  "chatTitle": "Messages",
+  "@chatTitle": {},
+
+  "newMessage": "New Message",
+  "@newMessage": {},
+
+  "typeMessage": "Type a message…",
+  "@typeMessage": {},
+
+  "send": "Send",
+  "@send": {},
+
+  "noConversations": "No conversations yet",
+  "@noConversations": {},
+
+  "marketplaceTitle": "Marketplace",
+  "@marketplaceTitle": {},
+
+  "searchListings": "Search listings…",
+  "@searchListings": {},
+
+  "noListings": "No listings available",
+  "@noListings": {},
+
+  "price": "Price",
+  "@price": {},
+
+  "location": "Location",
+  "@location": {},
+
+  "contactSeller": "Contact Seller",
+  "@contactSeller": {},
+
+  "placeOrder": "Place Order",
+  "@placeOrder": {},
+
+  "ordersTitle": "My Orders",
+  "@ordersTitle": {},
+
+  "orderStatus": "Order Status",
+  "@orderStatus": {},
+
+  "pending": "Pending",
+  "@pending": {},
+
+  "confirmed": "Confirmed",
+  "@confirmed": {},
+
+  "completed": "Completed",
+  "@completed": {},
+
+  "cancelled": "Cancelled",
+  "@cancelled": {},
+
+  "noOrders": "No orders yet",
+  "@noOrders": {},
+
+  "myListingsTitle": "My Listings",
+  "@myListingsTitle": {},
+
+  "createListing": "Create Listing",
+  "@createListing": {},
+
+  "noMyListings": "You have no listings yet",
+  "@noMyListings": {},
+
+  "active": "Active",
+  "@active": {},
+
+  "sold": "Sold",
+  "@sold": {},
+
+  "deceased": "Deceased",
+  "@deceased": {},
+
+  "healthy": "Healthy",
+  "@healthy": {},
+
+  "sick": "Sick",
+  "@sick": {},
+
+  "recovering": "Recovering",
+  "@recovering": {},
+
+  "critical": "Critical",
+  "@critical": {},
+
+  "vaccination": "Vaccination",
+  "@vaccination": {},
+
+  "treatment": "Treatment",
+  "@treatment": {},
+
+  "checkup": "Checkup",
+  "@checkup": {},
+
+  "deworming": "Deworming",
+  "@deworming": {},
+
+  "surgery": "Surgery",
+  "@surgery": {},
+
+  "hay": "Hay",
+  "@hay": {},
+
+  "grain": "Grain",
+  "@grain": {},
+
+  "silage": "Silage",
+  "@silage": {},
+
+  "grass": "Grass",
+  "@grass": {},
+
+  "pellets": "Pellets",
+  "@pellets": {},
+
+  "supplement": "Supplement",
+  "@supplement": {},
+
+  "other": "Other",
+  "@other": {},
+
+  "feed": "Feed",
+  "@feed": {},
+
+  "medicine": "Medicine",
+  "@medicine": {},
+
+  "labor": "Labor",
+  "@labor": {},
+
+  "equipment": "Equipment",
+  "@equipment": {},
+
+  "transport": "Transport",
+  "@transport": {},
+
+  "cow": "Cow",
+  "@cow": {},
+
+  "goat": "Goat",
+  "@goat": {},
+
+  "sheep": "Sheep",
+  "@sheep": {},
+
+  "pig": "Pig",
+  "@pig": {},
+
+  "chicken": "Chicken",
+  "@chicken": {},
+
+  "horse": "Horse",
+  "@horse": {},
+
+  "camel": "Camel",
+  "@camel": {},
+
+  "profileTitle": "My Profile",
+  "@profileTitle": {},
+
+  "updateProfile": "Update Profile",
+  "@updateProfile": {},
+
+  "profileUpdated": "Profile updated successfully",
+  "@profileUpdated": {},
+
+  "helpFaqTitle": "Help & FAQ",
+  "@helpFaqTitle": {},
+
+  "searchFaq": "Search questions…",
+  "@searchFaq": {},
+
+  "contactTitle": "Contact Support",
+  "@contactTitle": {},
+
+  "changePasswordTitle": "Change Password",
+  "@changePasswordTitle": {},
+
+  "currentPassword": "Current Password",
+  "@currentPassword": {},
+
+  "newPassword": "New Password",
+  "@newPassword": {},
+
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {},
+
+  "passwordChanged": "Password changed successfully",
+  "@passwordChanged": {},
+
+  "filtered": "filtered",
+  "@filtered": {},
+
+  "animalDetailsTitle": "Animal Details",
+  "@animalDetailsTitle": {},
+
+  "animalNotFound": "Animal not found",
+  "@animalNotFound": {},
+
+  "basicInformation": "Basic Information",
+  "@basicInformation": {},
+
+  "financialDetailsSection": "Financial Details",
+  "@financialDetailsSection": {},
+
+  "parentLabel": "Parent",
+  "@parentLabel": {},
+
+  "offspringSection": "Offspring ({count})",
+  "@offspringSection": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "noOffspringRecorded": "No offspring recorded",
+  "@noOffspringRecorded": {},
+
+  "registeredLabel": "Registered",
+  "@registeredLabel": {},
+
+  "soldOnLabel": "Sold On",
+  "@soldOnLabel": {},
+
+  "updateAnimalTitle": "Update Animal",
+  "@updateAnimalTitle": {},
+
+  "purchaseCostFixed": "Purchase Cost (fixed)",
+  "@purchaseCostFixed": {},
+
+  "statusLabel": "Status",
+  "@statusLabel": {},
+
+  "healthNotesLabel": "Health / Notes",
+  "@healthNotesLabel": {},
+
+  "healthNotesHint": "e.g. vaccinated, medication, health observations…",
+  "@healthNotesHint": {},
+
+  "saveChanges": "Save Changes",
+  "@saveChanges": {},
+
+  "animalUpdatedSuccess": "Animal updated successfully!",
+  "@animalUpdatedSuccess": {},
+
+  "animalUpdateFailed": "Failed to update animal",
+  "@animalUpdateFailed": {},
+
+  "alertsTab": "Alerts",
+  "@alertsTab": {},
+
+  "remindersTab": "Reminders",
+  "@remindersTab": {},
+
+  "alertsSubtitle": "You'll see alerts for messages and orders here",
+  "@alertsSubtitle": {},
+
+  "allUpToDate": "All up to date!",
+  "@allUpToDate": {},
+
+  "noUpcomingHealthChecks": "No upcoming vaccinations or checkups",
+  "@noUpcomingHealthChecks": {},
+
+  "daysAway": "{days} days away",
+  "@daysAway": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "overdue": "overdue",
+  "@overdue": {},
+
+  "dueLabel": "Due",
+  "@dueLabel": {},
+
+  "reportsAnalyticsTitle": "Reports & Analytics",
+  "@reportsAnalyticsTitle": {},
+
+  "generatePdf": "Generate PDF",
+  "@generatePdf": {},
+
+  "allTime": "All time",
+  "@allTime": {},
+
+  "reportIncidentTitle": "Report Incident",
+  "@reportIncidentTitle": {},
+
+  "logIncidentSystem": "Log incident in the system",
+  "@logIncidentSystem": {},
+
+  "farmSummary": "Farm Summary",
+  "@farmSummary": {},
+
+  "totalCosts": "Total Costs",
+  "@totalCosts": {},
+
+  "netProfit": "Net Profit",
+  "@netProfit": {},
+
+  "overallRoi": "Overall ROI",
+  "@overallRoi": {},
+
+  "profitableSalesLabel": "Profitable Sales",
+  "@profitableSalesLabel": {},
+
+  "lossSalesLabel": "Loss Sales",
+  "@lossSalesLabel": {},
+
+  "monthlyRevenueVsExpenses": "Monthly Revenue vs Expenses",
+  "@monthlyRevenueVsExpenses": {},
+
+  "expenseBreakdown": "Expense Breakdown",
+  "@expenseBreakdown": {},
+
+  "noDataYet": "No data yet",
+  "@noDataYet": {},
+
+  "noExpensesYet": "No expenses yet",
+  "@noExpensesYet": {},
+
+  "revenueLegend": "Revenue",
+  "@revenueLegend": {},
+
+  "incidentTypeLabel": "Incident Type",
+  "@incidentTypeLabel": {},
+
+  "submitReportLabel": "Submit Report",
+  "@submitReportLabel": {},
+
+  "describeIncidentHint": "Describe the incident…",
+  "@describeIncidentHint": {},
+
+  "incidentReportedFor": "Incident reported for {name}",
+  "@incidentReportedFor": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "failedToReportIncident": "Failed to report incident",
+  "@failedToReportIncident": {},
+
+  "animalMarketplace": "Animal Marketplace",
+  "@animalMarketplace": {},
+
+  "advancedFilters": "Advanced Filters",
+  "@advancedFilters": {},
+
+  "searchAnimalsBreeds": "Search animals, breeds, farmers…",
+  "@searchAnimalsBreeds": {},
+
+  "allListingsLabel": "All Listings",
+  "@allListingsLabel": {},
+
+  "noListingsFound": "No listings found",
+  "@noListingsFound": {},
+
+  "tryDifferentCategory": "Try a different category or filter",
+  "@tryDifferentCategory": {},
+
+  "clearFilters": "Clear Filters",
+  "@clearFilters": {},
+
+  "animalTypeLabel": "Animal Type",
+  "@animalTypeLabel": {},
+
+  "priceRange": "Price Range",
+  "@priceRange": {},
+
+  "minPrice": "Min price",
+  "@minPrice": {},
+
+  "maxPrice": "Max price",
+  "@maxPrice": {},
+
+  "farmLocationLabel": "Farm Location",
+  "@farmLocationLabel": {},
+
+  "locationHint": "e.g. Kumasi, Accra…",
+  "@locationHint": {},
+
+  "applyFilters": "Apply Filters",
+  "@applyFilters": {},
+
+  "clearAll": "Clear All",
+  "@clearAll": {},
+
+  "deleteListing": "Delete",
+  "@deleteListing": {},
+
+  "editListing": "Edit",
+  "@editListing": {},
+
+  "deleteListingConfirm": "Are you sure you want to delete this listing? This cannot be undone.",
+  "@deleteListingConfirm": {},
+
+  "failedToDeleteListing": "Failed to delete listing",
+  "@failedToDeleteListing": {},
+
+  "asBuyer": "As Buyer",
+  "@asBuyer": {},
+
+  "asSeller": "As Seller",
+  "@asSeller": {},
+
+  "noOrdersOnListings": "No orders on your listings",
+  "@noOrdersOnListings": {},
+
+  "browseMarketplace": "Browse Marketplace",
+  "@browseMarketplace": {},
+
+  "buyerLabel": "Buyer",
+  "@buyerLabel": {},
+
+  "sellerLabel": "Seller",
+  "@sellerLabel": {},
+
+  "payNowViaMoMo": "Pay Now via MoMo",
+  "@payNowViaMoMo": {},
+
+  "chatsTab": "Chats",
+  "@chatsTab": {},
+
+  "farmersTab": "Farmers",
+  "@farmersTab": {},
+
+  "goToFarmersTab": "Go to the Farmers tab to start a chat",
+  "@goToFarmersTab": {},
+
+  "directMessage": "Direct message",
+  "@directMessage": {},
+
+  "newConversation": "New conversation",
+  "@newConversation": {},
+
+  "noFarmersContactedYet": "No farmers contacted yet",
+  "@noFarmersContactedYet": {},
+
+  "tapFindFarmers": "Tap \"Find Farmers\" above to start a conversation",
+  "@tapFindFarmers": {},
+
+  "findFarmersToChat": "Find Farmers to Chat",
+  "@findFarmersToChat": {},
+
+  "findFarmers": "Find Farmers",
+  "@findFarmers": {},
+
+  "noOtherFarmersFound": "No other farmers found",
+  "@noOtherFarmersFound": {},
+
+  "tapToContinueConversation": "Tap to continue conversation",
+  "@tapToContinueConversation": {},
+
+  "couldNotOpenChat": "Could not open chat. Please try again.",
+  "@couldNotOpenChat": {},
+
+  "profileUpdatedSuccess": "Profile updated!",
+  "@profileUpdatedSuccess": {},
+
+  "updateFailed": "Update failed",
+  "@updateFailed": {},
+
+  "nameRequiredError": "Name required",
+  "@nameRequiredError": {},
+
+  "weAreHereToHelp": "We're here to help",
+  "@weAreHereToHelp": {},
+
+  "supportHours": "Our support team is available Monday to Friday, 8am – 6pm.",
+  "@supportHours": {},
+
+  "liveSupport": "Live Support",
+  "@liveSupport": {},
+
+  "chatWithSupportTitle": "Chat with Support",
+  "@chatWithSupportTitle": {},
+
+  "chatWithSupportSubtitle": "Start a live conversation with our team via Messages",
+  "@chatWithSupportSubtitle": {},
+
+  "openChat": "Open Chat",
+  "@openChat": {},
+
+  "contactDetailsSection": "Contact Details",
+  "@contactDetailsSection": {},
+
+  "responseTimesSection": "Response Times",
+  "@responseTimesSection": {},
+
+  "beforeContactUs": "Before You Contact Us",
+  "@beforeContactUs": {},
+
+  "faqInstantAnswer": "You may find an instant answer in our Help & FAQ:",
+  "@faqInstantAnswer": {},
+
+  "browseHelpFaq": "Browse Help & FAQ",
+  "@browseHelpFaq": {},
+
+  "appInformation": "App Information",
+  "@appInformation": {},
+
+  "tapToCopy": "Tap to copy",
+  "@tapToCopy": {},
+
+  "copied": "Copied: {text}",
+  "@copied": {
+    "placeholders": { "text": { "type": "String" } }
+  }
+}
