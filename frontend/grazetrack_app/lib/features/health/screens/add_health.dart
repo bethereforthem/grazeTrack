@@ -5,6 +5,7 @@ import '../providers/health_provider.dart';
 import '../../animals/providers/animal_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddHealthScreen extends ConsumerStatefulWidget {
   const AddHealthScreen({super.key});
@@ -59,11 +60,12 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
 
     setState(() => _isLoading = false);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(context, 'Health record added!');
+        AppUtils.showSnackBar(context, l10n.healthRecordAdded);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to save record', isError: true);
+        AppUtils.showSnackBar(context, l10n.healthRecordFailed, isError: true);
       }
     }
   }
@@ -71,12 +73,13 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
   @override
   Widget build(BuildContext context) {
     final animalState = ref.watch(animalProvider);
+    final l10n = AppLocalizations.of(context);
     final activeAnimals = animalState.animals
         .where((a) => a.status == 'active')
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Health Record')),
+      appBar: AppBar(title: Text(l10n.addHealthRecordTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -89,11 +92,11 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
               else
                 DropdownButtonFormField<String>(
                   initialValue: _selectedAnimalId,
-                  decoration: const InputDecoration(
-                    labelText: 'Select Animal *',
-                    prefixIcon: Icon(Icons.pets),
+                  decoration: InputDecoration(
+                    labelText: l10n.selectAnimalRequired,
+                    prefixIcon: const Icon(Icons.pets),
                   ),
-                  hint: const Text('Choose an animal'),
+                  hint: Text(l10n.chooseAnimal),
                   items: activeAnimals.map((a) {
                     final label = a.name.isNotEmpty
                         ? '${a.name} (${a.type})'
@@ -102,14 +105,14 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
                   }).toList(),
                   onChanged: (val) => setState(() => _selectedAnimalId = val),
                   validator: (val) =>
-                      (val == null || val.isEmpty) ? 'Please select an animal' : null,
+                      (val == null || val.isEmpty) ? l10n.pleaseSelectAnimal : null,
                 ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Record Type *',
-                  prefixIcon: Icon(Icons.medical_services_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.recordTypeRequired,
+                  prefixIcon: const Icon(Icons.medical_services_outlined),
                 ),
                 items: AppConstants.healthTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -119,9 +122,9 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedStatus,
-                decoration: const InputDecoration(
-                  labelText: 'Health Status *',
-                  prefixIcon: Icon(Icons.health_and_safety_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.healthStatusRequired,
+                  prefixIcon: const Icon(Icons.health_and_safety_outlined),
                 ),
                 items: AppConstants.healthStatuses
                     .map((s) => DropdownMenuItem(value: s, child: Text(s)))
@@ -131,43 +134,43 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _vaccinationController,
-                decoration: const InputDecoration(
-                  labelText: 'Vaccine / Treatment Name',
-                  prefixIcon: Icon(Icons.vaccines_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.vaccineTreatmentName,
+                  prefixIcon: const Icon(Icons.vaccines_outlined),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _medicineController,
-                decoration: const InputDecoration(
-                  labelText: 'Medicine Used',
-                  prefixIcon: Icon(Icons.medication_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.medicineUsed,
+                  prefixIcon: const Icon(Icons.medication_outlined),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _costController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Cost (\$)',
-                  prefixIcon: Icon(Icons.attach_money),
+                decoration: InputDecoration(
+                  labelText: l10n.costField,
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _vetController,
-                decoration: const InputDecoration(
-                  labelText: 'Veterinarian Name',
-                  prefixIcon: Icon(Icons.person_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.veterinarianName,
+                  prefixIcon: const Icon(Icons.person_outlined),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes / Description',
-                  prefixIcon: Icon(Icons.notes),
+                decoration: InputDecoration(
+                  labelText: l10n.notesDescription,
+                  prefixIcon: const Icon(Icons.notes),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -180,7 +183,7 @@ class _AddHealthScreenState extends ConsumerState<AddHealthScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Save Health Record'),
+                    : Text(l10n.saveHealthRecord),
               ),
             ],
           ),
