@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Contact Support')),
+      appBar: AppBar(title: Text(l10n.contactTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -25,20 +28,20 @@ class ContactScreen extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Icon(Icons.support_agent, size: 56, color: Colors.white),
-                SizedBox(height: 12),
-                Text('We\'re here to help',
-                    style: TextStyle(
+                const Icon(Icons.support_agent, size: 56, color: Colors.white),
+                const SizedBox(height: 12),
+                Text(l10n.weAreHereToHelp,
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold)),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Our support team is available Monday to Friday, 8am – 6pm.',
+                  l10n.supportHours,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
             ),
@@ -47,7 +50,7 @@ class ContactScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── Live support chat ───────────────────────────────────────
-          const _SectionLabel('Live Support'),
+          _SectionLabel(l10n.liveSupport),
           Card(
             child: ListTile(
               contentPadding:
@@ -57,10 +60,9 @@ class ContactScreen extends StatelessWidget {
                 child: Icon(Icons.chat_bubble_outline,
                     color: AppTheme.primaryGreen),
               ),
-              title: const Text('Chat with Support',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: const Text(
-                  'Start a live conversation with our team via Messages'),
+              title: Text(l10n.chatWithSupportTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Text(l10n.chatWithSupportSubtitle),
               trailing: ElevatedButton(
                 onPressed: () => context.go('/chat'),
                 style: ElevatedButton.styleFrom(
@@ -68,7 +70,7 @@ class ContactScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   textStyle: const TextStyle(fontSize: 13),
                 ),
-                child: const Text('Open Chat'),
+                child: Text(l10n.openChat),
               ),
             ),
           ),
@@ -76,22 +78,22 @@ class ContactScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Contact details ─────────────────────────────────────────
-          const _SectionLabel('Contact Details'),
+          _SectionLabel(l10n.contactDetailsSection),
           _ContactTile(
             icon: Icons.email_outlined,
             label: 'Email',
             value: 'support@grazetrack.com',
             onTap: () => _copy(context, 'support@grazetrack.com'),
-            badge: 'Tap to copy',
+            badge: l10n.tapToCopy,
           ),
           _ContactTile(
             icon: Icons.phone_outlined,
             label: 'Phone',
             value: '+1 (800) 472-9385',
             onTap: () => _copy(context, '+18004729385'),
-            badge: 'Tap to copy',
+            badge: l10n.tapToCopy,
           ),
-          _ContactTile(
+          const _ContactTile(
             icon: Icons.language_outlined,
             label: 'Website',
             value: 'www.grazetrack.com',
@@ -101,7 +103,7 @@ class ContactScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Response time info ──────────────────────────────────────
-          const _SectionLabel('Response Times'),
+          _SectionLabel(l10n.responseTimesSection),
           const _InfoRow(Icons.chat_bubble_outline, 'Live Chat', 'Under 5 minutes'),
           const _InfoRow(Icons.email_outlined, 'Email', 'Within 24 hours'),
           const _InfoRow(Icons.phone_outlined, 'Phone', 'Mon–Fri, 8am – 6pm'),
@@ -109,27 +111,26 @@ class ContactScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Before you contact ──────────────────────────────────────
-          const _SectionLabel('Before You Contact Us'),
+          _SectionLabel(l10n.beforeContactUs),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'You may find an instant answer in our Help & FAQ:',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  Text(
+                    l10n.faqInstantAnswer,
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () => context.push('/help-faq'),
                     icon: const Icon(Icons.help_outline, size: 18),
-                    label: const Text('Browse Help & FAQ'),
+                    label: Text(l10n.browseHelpFaq),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 44),
                       foregroundColor: AppTheme.primaryGreen,
-                      side:
-                          const BorderSide(color: AppTheme.primaryGreen),
+                      side: const BorderSide(color: AppTheme.primaryGreen),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
@@ -142,7 +143,7 @@ class ContactScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── App info ────────────────────────────────────────────────
-          const _SectionLabel('App Information'),
+          _SectionLabel(l10n.appInformation),
           const _InfoRow(Icons.info_outline, 'Version', 'GrazeTrack v1.0.0'),
           const _InfoRow(
               Icons.policy_outlined, 'Privacy Policy', 'www.grazetrack.com/privacy'),
@@ -156,10 +157,11 @@ class ContactScreen extends StatelessWidget {
   }
 
   void _copy(BuildContext context, String text) {
+    final l10n = AppLocalizations.of(context);
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied: $text'),
+        content: Text(l10n.copied(text)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -208,11 +210,9 @@ class _ContactTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading:
-            Icon(icon, color: AppTheme.primaryGreen),
+        leading: Icon(icon, color: AppTheme.primaryGreen),
         title: Text(label,
-            style: const TextStyle(
-                fontSize: 12, color: Colors.grey)),
+            style: const TextStyle(fontSize: 12, color: Colors.grey)),
         subtitle: Text(value,
             style: const TextStyle(
                 fontWeight: FontWeight.w600, fontSize: 15)),
@@ -249,8 +249,7 @@ class _InfoRow extends StatelessWidget {
             style: const TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w500)),
         trailing: Text(value,
-            style:
-                const TextStyle(fontSize: 12, color: Colors.grey)),
+            style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ),
     );
   }
