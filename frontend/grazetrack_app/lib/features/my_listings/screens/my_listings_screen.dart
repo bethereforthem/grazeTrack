@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../my_listings_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -23,10 +24,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myListingsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Listings'),
+        title: Text(l10n.myListingsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -46,14 +48,14 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                       const Icon(Icons.sell_outlined,
                           size: 64, color: Colors.grey),
                       const SizedBox(height: 12),
-                      const Text('No listings yet',
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey)),
+                      Text(l10n.noMyListings,
+                          style: const TextStyle(
+                              fontSize: 18, color: Colors.grey)),
                       const SizedBox(height: 8),
                       ElevatedButton.icon(
                         onPressed: () => context.push('/my-listings/create'),
                         icon: const Icon(Icons.add),
-                        label: const Text('Create Listing'),
+                        label: Text(l10n.createListing),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryGreen,
                         ),
@@ -81,6 +83,7 @@ class _MyListingCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final status = listing['status'] ?? 'available';
     final statusColor = status == 'available'
         ? Colors.green
@@ -106,7 +109,7 @@ class _MyListingCard extends ConsumerWidget {
           children: [
             Text(
               AppUtils.formatCurrency((listing['price'] ?? 0).toDouble()),
-              style: TextStyle(
+              style: const TextStyle(
                   color: AppTheme.primaryGreen, fontWeight: FontWeight.w600),
             ),
             Row(
@@ -143,10 +146,9 @@ class _MyListingCard extends ConsumerWidget {
             } else if (val == 'delete') {
               final confirm = await AppUtils.showConfirmDialog(
                 context,
-                title: 'Delete Listing',
-                message:
-                    'Are you sure you want to delete this listing? This cannot be undone.',
-                confirmText: 'Delete',
+                title: l10n.deleteListing,
+                message: l10n.deleteListingConfirm,
+                confirmText: l10n.deleteListing,
               );
               if (confirm) {
                 final ok = await ref
@@ -154,27 +156,28 @@ class _MyListingCard extends ConsumerWidget {
                     .deleteListing(listing['id']);
                 if (!ok && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to delete listing')),
+                    SnackBar(content: Text(l10n.failedToDeleteListing)),
                   );
                 }
               }
             }
           },
-          itemBuilder: (_) => const [
+          itemBuilder: (_) => [
             PopupMenuItem(
               value: 'edit',
               child: Row(children: [
-                Icon(Icons.edit_outlined, size: 18),
-                SizedBox(width: 8),
-                Text('Edit'),
+                const Icon(Icons.edit_outlined, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.editListing),
               ]),
             ),
             PopupMenuItem(
               value: 'delete',
               child: Row(children: [
-                Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Delete', style: TextStyle(color: Colors.red)),
+                const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                const SizedBox(width: 8),
+                Text(l10n.deleteListing,
+                    style: const TextStyle(color: Colors.red)),
               ]),
             ),
           ],
