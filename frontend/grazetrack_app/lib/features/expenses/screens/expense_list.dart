@@ -6,6 +6,7 @@ import '../models/expense_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExpenseListScreen extends ConsumerStatefulWidget {
   const ExpenseListScreen({super.key});
@@ -55,10 +56,8 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
       final matchesSearch = q.isEmpty ||
           exp.type.toLowerCase().contains(q) ||
           exp.description.toLowerCase().contains(q);
-
       final matchesType = _selectedType == 'All' ||
           exp.type.toLowerCase() == _selectedType.toLowerCase();
-
       return matchesSearch && matchesType;
     }).toList();
   }
@@ -66,13 +65,14 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(expenseProvider);
+    final l10n = AppLocalizations.of(context);
     final filtered = _filtered(state.expenses);
     final total = filtered.fold<double>(0, (s, e) => s + e.amount);
     final hasFilter = _selectedType != 'All';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expenses'),
+        title: Text(l10n.expensesTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -82,14 +82,13 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
       ),
       body: Column(
         children: [
-          // ─── Search bar ──────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v.trim()),
               decoration: InputDecoration(
-                hintText: 'Search expenses…',
+                hintText: l10n.searchExpenses,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -101,8 +100,8 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                       )
                     : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10, horizontal: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10)),
                 filled: true,
@@ -111,8 +110,6 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
-          // ─── Filter chips ────────────────────────────────────────
           SizedBox(
             height: 38,
             child: ListView(
@@ -122,37 +119,32 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                 _FilterDropdown(
                   icon: Icons.category_outlined,
                   value: _selectedType,
-                  items: const ['All', ...AppConstants.expenseTypes],
+                  items: [l10n.all, ...AppConstants.expenseTypes],
                   onChanged: (v) => setState(() => _selectedType = v!),
                 ),
                 if (hasFilter) ...[
                   const SizedBox(width: 8),
                   ActionChip(
                     avatar: const Icon(Icons.clear, size: 14),
-                    label: const Text('Clear',
-                        style: TextStyle(fontSize: 12)),
-                    onPressed: () =>
-                        setState(() => _selectedType = 'All'),
+                    label: Text(l10n.clear,
+                        style: const TextStyle(fontSize: 12)),
+                    onPressed: () => setState(() => _selectedType = 'All'),
                   ),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 4),
-
-          // ─── Total banner ────────────────────────────────────────
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             color: AppTheme.primaryGreen,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${filtered.length} expense${filtered.length == 1 ? '' : 's'}${hasFilter || _searchQuery.isNotEmpty ? ' (filtered)' : ''}',
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 12),
+                  '${filtered.length} expense${filtered.length == 1 ? '' : 's'}${hasFilter || _searchQuery.isNotEmpty ? ' (${l10n.filtered})' : ''}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
                 Text(
                   AppUtils.formatCurrency(total),
@@ -164,8 +156,6 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
               ],
             ),
           ),
-
-          // ─── List ────────────────────────────────────────────────
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -179,8 +169,8 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                             const SizedBox(height: 12),
                             Text(
                               state.expenses.isEmpty
-                                  ? 'No expenses recorded'
-                                  : 'No expenses match your filters',
+                                  ? l10n.noExpensesRecorded
+                                  : l10n.noExpensesMatchFilter,
                               style: const TextStyle(
                                   fontSize: 15, color: Colors.grey),
                             ),
@@ -197,12 +187,10 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           itemBuilder: (ctx, i) {
                             final exp = filtered[i];
                             return Card(
-                              margin:
-                                  const EdgeInsets.only(bottom: 10),
+                              margin: const EdgeInsets.only(bottom: 10),
                               child: ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor:
-                                      AppTheme.backgroundGreen,
+                                  backgroundColor: AppTheme.backgroundGreen,
                                   child: Icon(_typeIcon(exp.type),
                                       color: AppTheme.primaryGreen),
                                 ),
@@ -231,14 +219,13 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         onPressed: () => context.push('/expenses/add'),
         backgroundColor: AppTheme.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Add Expense',
-            style: TextStyle(color: Colors.white)),
+        label: Text(l10n.addExpense,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
 }
 
-// ─── Reusable compact filter dropdown ────────────────────────────────────────
 class _FilterDropdown extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -254,13 +241,12 @@ class _FilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = value != 'All';
+    final allLabel = AppLocalizations.of(context).all;
+    final isActive = value != 'All' && value != allLabel;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppTheme.primaryGreen.withAlpha(20)
-            : Colors.grey.shade100,
+        color: isActive ? AppTheme.primaryGreen.withAlpha(20) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: isActive
@@ -275,8 +261,7 @@ class _FilterDropdown extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             color: isActive ? AppTheme.primaryGreen : Colors.black87,
-            fontWeight:
-                isActive ? FontWeight.bold : FontWeight.normal,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
           items: items
               .map((t) => DropdownMenuItem(value: t, child: Text(t)))
