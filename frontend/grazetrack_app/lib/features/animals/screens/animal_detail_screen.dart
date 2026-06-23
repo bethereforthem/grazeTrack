@@ -5,6 +5,7 @@ import '../models/animal_model.dart';
 import '../providers/animal_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AnimalDetailScreen extends ConsumerStatefulWidget {
   final String animalId;
@@ -20,7 +21,6 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Always fetch fresh details from the database when this screen opens.
     Future.microtask(_fetchFresh);
   }
 
@@ -34,35 +34,35 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(animalProvider);
+    final l10n = AppLocalizations.of(context);
     final animal = state.animals.firstWhere(
       (a) => a.id == widget.animalId,
       orElse: () =>
           const AnimalModel(id: '', userId: '', type: '', purchaseCost: 0),
     );
 
-    // Show spinner while fetching for the first time
     if (_fetching && animal.id.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Animal Details')),
+        appBar: AppBar(title: Text(l10n.animalDetailsTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (animal.id.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Animal Details')),
+        appBar: AppBar(title: Text(l10n.animalDetailsTitle)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 8),
-              const Text('Animal not found'),
+              Text(l10n.animalNotFound),
               const SizedBox(height: 8),
               TextButton.icon(
                 onPressed: _fetchFresh,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n.retry),
               ),
             ],
           ),
@@ -70,11 +70,9 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
       );
     }
 
-    // Children — animals whose parentId matches this animal's id
     final children =
         state.animals.where((a) => a.parentId == widget.animalId).toList();
 
-    // Parent — if this animal has a parentId
     AnimalModel? parent;
     if (animal.parentId != null && animal.parentId!.isNotEmpty) {
       try {
@@ -93,15 +91,12 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
       appBar: AppBar(
         title: Text(animal.name.isNotEmpty ? animal.name : animal.type),
         actions: [
-          // ── Show edit button only for active animals ──────────────
           if (isActive)
             IconButton(
               icon: const Icon(Icons.edit),
-              tooltip: 'Update animal',
               onPressed: () =>
                   context.push('/animals/update/${animal.id}'),
             ),
-          // ── Refresh button ────────────────────────────────────────
           IconButton(
             icon: _fetching
                 ? const SizedBox(
@@ -111,7 +106,6 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
                         color: Colors.white, strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
-            tooltip: 'Refresh',
             onPressed: _fetching ? null : _fetchFresh,
           ),
         ],
@@ -121,7 +115,6 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ─── Status Banner ─────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -143,49 +136,47 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ─── Basic Info Card ───────────────────────────────────
             _SectionCard(
-              title: 'Basic Information',
+              title: l10n.basicInformation,
               children: [
-                _InfoRow('Name / Tag',
+                _InfoRow(l10n.nameTagOptional,
                     animal.name.isNotEmpty ? animal.name : '—'),
-                _InfoRow('Type', animal.type),
-                _InfoRow('Breed',
+                _InfoRow(l10n.animalTypeRequired, animal.type),
+                _InfoRow(l10n.breed,
                     animal.breed.isNotEmpty ? animal.breed : '—'),
-                _InfoRow('Gender',
+                _InfoRow(l10n.gender,
                     animal.gender.isNotEmpty ? animal.gender : '—'),
-                _InfoRow('Current Age', '${animal.currentAge} months'),
-                _InfoRow('Weight',
+                _InfoRow(l10n.ageMonths, '${animal.currentAge} ${l10n.months}'),
+                _InfoRow(l10n.weightKg,
                     animal.weight > 0 ? '${animal.weight} kg' : '—'),
-                _InfoRow(
-                    'Registered', AppUtils.formatDate(animal.createdAt)),
+                _InfoRow(l10n.registeredLabel,
+                    AppUtils.formatDate(animal.createdAt)),
               ],
             ),
             const SizedBox(height: 16),
 
-            // ─── Financial Info Card ───────────────────────────────
             _SectionCard(
-              title: 'Financial Details',
+              title: l10n.financialDetailsSection,
               children: [
-                _InfoRow('Purchase Cost',
+                _InfoRow(l10n.purchaseCost,
                     AppUtils.formatCurrency(animal.purchaseCost)),
                 if (animal.status == 'sold') ...[
-                  _InfoRow('Sold Price',
+                  _InfoRow(l10n.soldPrice,
                       AppUtils.formatCurrency(animal.soldPrice ?? 0)),
                   _InfoRow(
-                    'Profit / Loss',
+                    l10n.profitLoss,
                     AppUtils.profitLabel(
                         (animal.soldPrice ?? 0) - animal.purchaseCost),
                     valueColor: AppUtils.profitColor(
                         (animal.soldPrice ?? 0) - animal.purchaseCost),
                   ),
                   if (animal.soldAt != null)
-                    _InfoRow(
-                        'Sold On', AppUtils.formatDate(animal.soldAt!)),
+                    _InfoRow(l10n.soldOnLabel,
+                        AppUtils.formatDate(animal.soldAt!)),
                 ],
                 if (animal.status == 'deceased') ...[
                   if (animal.soldAt != null)
-                    _InfoRow('Date of Death',
+                    _InfoRow(l10n.dateOfDeath,
                         AppUtils.formatDate(animal.soldAt!),
                         valueColor: Colors.red),
                 ],
@@ -193,10 +184,9 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ─── Parent Info ───────────────────────────────────────
             if (parent != null) ...[
               _SectionCard(
-                title: 'Parent',
+                title: l10n.parentLabel,
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -214,7 +204,7 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
                         ? parent.name
                         : parent.type),
                     subtitle: Text(
-                        '${parent.breed} • ${parent.currentAge} months'),
+                        '${parent.breed} • ${parent.currentAge} ${l10n.months}'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () =>
                         context.push('/animals/${parent!.id}'),
@@ -224,15 +214,14 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
               const SizedBox(height: 16),
             ],
 
-            // ─── Children List ─────────────────────────────────────
             _SectionCard(
-              title: 'Offspring (${children.length})',
+              title: l10n.offspringSection(children.length),
               children: children.isEmpty
                   ? [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('No offspring recorded',
-                            style: TextStyle(color: Colors.grey)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(l10n.noOffspringRecorded,
+                            style: const TextStyle(color: Colors.grey)),
                       )
                     ]
                   : children
@@ -252,7 +241,7 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
                                 ? child.name
                                 : child.type),
                             subtitle: Text(
-                                '${child.breed} • ${child.currentAge} months'),
+                                '${child.breed} • ${child.currentAge} ${l10n.months}'),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () =>
                                 context.push('/animals/${child.id}'),
@@ -261,10 +250,9 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ─── Notes ────────────────────────────────────────────
             if (animal.notes.isNotEmpty) ...[
               _SectionCard(
-                title: 'Notes',
+                title: l10n.notesOptional,
                 children: [
                   Text(animal.notes,
                       style: const TextStyle(color: Colors.black87)),
@@ -278,7 +266,6 @@ class _AnimalDetailScreenState extends ConsumerState<AnimalDetailScreen> {
   }
 }
 
-// ─── Section card wrapper ──────────────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
@@ -317,7 +304,6 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// ─── Info row ──────────────────────────────────────────────────────────
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
