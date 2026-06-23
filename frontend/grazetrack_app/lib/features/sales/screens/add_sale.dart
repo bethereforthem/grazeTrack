@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/sales_provider.dart';
 import '../../animals/providers/animal_provider.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddSaleScreen extends ConsumerStatefulWidget {
   const AddSaleScreen({super.key});
@@ -47,12 +48,12 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
 
     setState(() => _isLoading = false);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(
-            context, 'Sale recorded! Profit calculated automatically.');
+        AppUtils.showSnackBar(context, l10n.saleRecordedSuccess);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to record sale', isError: true);
+        AppUtils.showSnackBar(context, l10n.saleRecordFailed, isError: true);
       }
     }
   }
@@ -60,12 +61,13 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
   @override
   Widget build(BuildContext context) {
     final animalState = ref.watch(animalProvider);
+    final l10n = AppLocalizations.of(context);
     final activeAnimals = animalState.animals
         .where((a) => a.status == 'active')
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Record Sale')),
+      appBar: AppBar(title: Text(l10n.recordSaleTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -73,7 +75,6 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Info card
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -81,14 +82,14 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.blue[200]!),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue, size: 18),
-                    SizedBox(width: 8),
+                    const Icon(Icons.info_outline, color: Colors.blue, size: 18),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Profit/loss is calculated automatically from the animal\'s purchase cost, feed, and health expenses.',
-                        style: TextStyle(fontSize: 12, color: Colors.blue),
+                        l10n.profitAutoCalculated,
+                        style: const TextStyle(fontSize: 12, color: Colors.blue),
                       ),
                     ),
                   ],
@@ -100,11 +101,11 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
               else
                 DropdownButtonFormField<String>(
                   initialValue: _selectedAnimalId,
-                  decoration: const InputDecoration(
-                    labelText: 'Select Animal *',
-                    prefixIcon: Icon(Icons.pets),
+                  decoration: InputDecoration(
+                    labelText: l10n.selectAnimalRequired,
+                    prefixIcon: const Icon(Icons.pets),
                   ),
-                  hint: const Text('Choose an animal'),
+                  hint: Text(l10n.chooseAnimal),
                   items: activeAnimals.map((a) {
                     final label = a.name.isNotEmpty
                         ? '${a.name} (${a.type})'
@@ -113,37 +114,37 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
                   }).toList(),
                   onChanged: (val) => setState(() => _selectedAnimalId = val),
                   validator: (val) =>
-                      (val == null || val.isEmpty) ? 'Please select an animal' : null,
+                      (val == null || val.isEmpty) ? l10n.pleaseSelectAnimal : null,
                 ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _sellingPriceController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Selling Price (\$) *',
-                  prefixIcon: Icon(Icons.attach_money),
+                decoration: InputDecoration(
+                  labelText: l10n.sellingPriceRequired,
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Selling price required';
-                  if (double.tryParse(val) == null) return 'Enter a valid number';
+                  if (val == null || val.isEmpty) return l10n.sellingPriceRequiredValidator;
+                  if (double.tryParse(val) == null) return l10n.enterValidNumber;
                   return null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _buyerNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Buyer Name (optional)',
-                  prefixIcon: Icon(Icons.person_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.buyerNameOptional,
+                  prefixIcon: const Icon(Icons.person_outlined),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _notesController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  prefixIcon: Icon(Icons.notes),
+                decoration: InputDecoration(
+                  labelText: l10n.notesOptional,
+                  prefixIcon: const Icon(Icons.notes),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -156,7 +157,7 @@ class _AddSaleScreenState extends ConsumerState<AddSaleScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Record Sale & Calculate Profit'),
+                    : Text(l10n.recordSaleAndCalculate),
               ),
             ],
           ),
