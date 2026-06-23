@@ -6,6 +6,7 @@ import '../models/animal_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AnimalListScreen extends ConsumerStatefulWidget {
   const AnimalListScreen({super.key});
@@ -74,11 +75,8 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
     }
   }
 
-  // ─── Active animals list ─────────────────────────────────────────────────
-  // Each card has a visible popup menu with "View Details" and "Update".
-  // No delete option.
-  Widget _buildActiveList(List<AnimalModel> animals) {
-    if (animals.isEmpty) return _emptyState();
+  Widget _buildActiveList(List<AnimalModel> animals, AppLocalizations l10n) {
+    if (animals.isEmpty) return _emptyState(l10n);
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -92,7 +90,6 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ─── Header row ──────────────────────────────────
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -119,7 +116,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                           ),
                           Text(
                             '${animal.breed.isNotEmpty ? animal.breed : animal.type}'
-                            ' • ${animal.currentAge} months'
+                            ' • ${animal.currentAge} ${l10n.months}'
                             ' • ${animal.gender}',
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.grey),
@@ -139,9 +136,8 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                         ],
                       ),
                     ),
-
-                    // ─── Popup menu — clearly visible green button ────
                     _AnimalMenuButton(
+                      l10n: l10n,
                       onViewDetails: () =>
                           context.push('/animals/${animal.id}'),
                       onUpdate: () =>
@@ -150,10 +146,8 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                   ],
                 ),
                 const SizedBox(height: 6),
-
-                // ─── Purchase cost ───────────────────────────────────
                 Text(
-                  'Purchase Cost: ${AppUtils.formatCurrency(animal.purchaseCost)}',
+                  '${l10n.purchaseCost}: ${AppUtils.formatCurrency(animal.purchaseCost)}',
                   style: const TextStyle(fontSize: 13, color: Colors.black87),
                 ),
               ],
@@ -164,11 +158,8 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
     );
   }
 
-  // ─── Sold / Deceased animals list ───────────────────────────────────────
-  // Simple read-only cards: name, cost of buying, date of buy, date sold/died.
-  // No action buttons at all.
-  Widget _buildInactiveList(List<AnimalModel> animals) {
-    if (animals.isEmpty) return _emptyState();
+  Widget _buildInactiveList(List<AnimalModel> animals, AppLocalizations l10n) {
+    if (animals.isEmpty) return _emptyState(l10n);
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -177,7 +168,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
         final animal = animals[i];
         final isSold = animal.status == 'sold';
         final statusColor = isSold ? Colors.blue : Colors.red;
-        final dateLabel = isSold ? 'Date Sold' : 'Date of Death';
+        final dateLabel = isSold ? l10n.dateSold : l10n.dateOfDeath;
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -186,7 +177,6 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   children: [
                     CircleAvatar(
@@ -233,17 +223,15 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                 const SizedBox(height: 10),
                 const Divider(height: 1),
                 const SizedBox(height: 10),
-
-                // Info rows
                 _InfoLine(
                   icon: Icons.attach_money,
-                  label: 'Cost of Buying',
+                  label: l10n.costOfBuying,
                   value: AppUtils.formatCurrency(animal.purchaseCost),
                 ),
                 const SizedBox(height: 6),
                 _InfoLine(
                   icon: Icons.calendar_today_outlined,
-                  label: 'Date of Buy',
+                  label: l10n.dateOfBuy,
                   value: animal.createdAt.isNotEmpty
                       ? AppUtils.formatDate(animal.createdAt)
                       : '—',
@@ -259,20 +247,18 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                       : '—',
                   valueColor: statusColor,
                 ),
-
-                // Sold price + profit for sold animals
                 if (isSold && animal.soldPrice != null) ...[
                   const SizedBox(height: 6),
                   _InfoLine(
                     icon: Icons.price_check,
-                    label: 'Sold Price',
+                    label: l10n.soldPrice,
                     value: AppUtils.formatCurrency(animal.soldPrice!),
                     valueColor: Colors.blue,
                   ),
                   const SizedBox(height: 6),
                   _InfoLine(
                     icon: Icons.trending_up,
-                    label: 'Profit / Loss',
+                    label: l10n.profitLoss,
                     value: AppUtils.profitLabel(
                         animal.soldPrice! - animal.purchaseCost),
                     valueColor: AppUtils.profitColor(
@@ -287,16 +273,16 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
     );
   }
 
-  Widget _emptyState() {
-    return const Center(
+  Widget _emptyState(AppLocalizations l10n) {
+    return Center(
       child: Padding(
-        padding: EdgeInsets.only(top: 80),
+        padding: const EdgeInsets.only(top: 80),
         child: Column(
           children: [
-            Icon(Icons.pets, size: 56, color: Colors.grey),
-            SizedBox(height: 12),
-            Text('No animals in this category',
-                style: TextStyle(color: Colors.grey, fontSize: 15)),
+            const Icon(Icons.pets, size: 56, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(l10n.noAnimalsInCategory,
+                style: const TextStyle(color: Colors.grey, fontSize: 15)),
           ],
         ),
       ),
@@ -306,6 +292,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(animalProvider);
+    final l10n = AppLocalizations.of(context);
 
     final active   = _filtered(state.animals.where((a) => a.status == 'active').toList());
     final sold     = _filtered(state.animals.where((a) => a.status == 'sold').toList());
@@ -314,7 +301,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Animals (${state.animals.length})'),
+        title: Text(l10n.myAnimalsCount(state.animals.length)),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -335,21 +322,21 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.circle, size: 8, color: Color(0xFF81C784)),
                 const SizedBox(width: 6),
-                Text('Active (${active.length})'),
+                Text(l10n.activeCount(active.length)),
               ]),
             ),
             Tab(
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.circle, size: 8, color: Colors.lightBlueAccent),
                 const SizedBox(width: 6),
-                Text('Sold (${sold.length})'),
+                Text(l10n.soldCount(sold.length)),
               ]),
             ),
             Tab(
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.circle, size: 8, color: Colors.redAccent),
                 const SizedBox(width: 6),
-                Text('Deceased (${deceased.length})'),
+                Text(l10n.deceasedCount(deceased.length)),
               ]),
             ),
           ],
@@ -357,14 +344,14 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
       ),
       body: Column(
         children: [
-          // ─── Search bar ────────────────────────────────────────
+          // ─── Search bar ─────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v.trim()),
               decoration: InputDecoration(
-                hintText: 'Search by name, type, or breed…',
+                hintText: l10n.searchByNameTypeBreed,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -387,7 +374,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
           ),
           const SizedBox(height: 8),
 
-          // ─── Category filter ───────────────────────────────────
+          // ─── Category filter ──────────────────────────────────
           SizedBox(
             height: 38,
             child: ListView(
@@ -396,14 +383,15 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
               children: [
                 _AnimalTypeFilter(
                   value: _selectedType,
-                  items: const ['All', ...AppConstants.animalTypes],
+                  items: [l10n.all, ...AppConstants.animalTypes],
                   onChanged: (v) => setState(() => _selectedType = v!),
                 ),
                 if (hasFilter) ...[
                   const SizedBox(width: 8),
                   ActionChip(
                     avatar: const Icon(Icons.clear, size: 14),
-                    label: const Text('Clear', style: TextStyle(fontSize: 12)),
+                    label: Text(l10n.clear,
+                        style: const TextStyle(fontSize: 12)),
                     onPressed: () => setState(() => _selectedType = 'All'),
                   ),
                 ],
@@ -412,7 +400,7 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
           ),
           const SizedBox(height: 4),
 
-          // ─── Tab body ──────────────────────────────────────────
+          // ─── Tab body ─────────────────────────────────────────
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -425,15 +413,14 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                                 size: 48, color: Colors.red),
                             const SizedBox(height: 8),
                             Text(state.error!,
-                                style:
-                                    const TextStyle(color: Colors.red)),
+                                style: const TextStyle(color: Colors.red)),
                             const SizedBox(height: 8),
                             TextButton.icon(
                               onPressed: () => ref
                                   .read(animalProvider.notifier)
                                   .loadAnimals(),
                               icon: const Icon(Icons.refresh),
-                              label: const Text('Retry'),
+                              label: Text(l10n.retry),
                             ),
                           ],
                         ),
@@ -444,9 +431,9 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
                         child: TabBarView(
                           controller: _tabController,
                           children: [
-                            _buildActiveList(active),
-                            _buildInactiveList(sold),
-                            _buildInactiveList(deceased),
+                            _buildActiveList(active, l10n),
+                            _buildInactiveList(sold, l10n),
+                            _buildInactiveList(deceased, l10n),
                           ],
                         ),
                       ),
@@ -457,14 +444,13 @@ class _AnimalListScreenState extends ConsumerState<AnimalListScreen>
         onPressed: () => context.push('/animals/add'),
         backgroundColor: AppTheme.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label:
-            const Text('Add Animal', style: TextStyle(color: Colors.white)),
+        label: Text(l10n.addAnimal,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
 }
 
-// ─── Animal type filter dropdown ─────────────────────────────────────────────
 class _AnimalTypeFilter extends StatelessWidget {
   final String value;
   final List<String> items;
@@ -478,7 +464,7 @@ class _AnimalTypeFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = value != 'All';
+    final isActive = value != 'All' && value != AppLocalizations.of(context).all;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
@@ -496,8 +482,7 @@ class _AnimalTypeFilter extends StatelessWidget {
         children: [
           Icon(Icons.pets,
               size: 14,
-              color:
-                  isActive ? AppTheme.primaryGreen : Colors.grey),
+              color: isActive ? AppTheme.primaryGreen : Colors.grey),
           const SizedBox(width: 4),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -506,14 +491,11 @@ class _AnimalTypeFilter extends StatelessWidget {
               isDense: true,
               style: TextStyle(
                 fontSize: 12,
-                color:
-                    isActive ? AppTheme.primaryGreen : Colors.black87,
-                fontWeight:
-                    isActive ? FontWeight.bold : FontWeight.normal,
+                color: isActive ? AppTheme.primaryGreen : Colors.black87,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
               items: items
-                  .map((t) =>
-                      DropdownMenuItem(value: t, child: Text(t)))
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                   .toList(),
               onChanged: onChanged,
             ),
@@ -524,13 +506,13 @@ class _AnimalTypeFilter extends StatelessWidget {
   }
 }
 
-// ─── Popup menu button widget ────────────────────────────────────────────────
-// Clearly visible green button with "⋮" icon; shows on hover and on tap.
 class _AnimalMenuButton extends StatefulWidget {
+  final AppLocalizations l10n;
   final VoidCallback onViewDetails;
   final VoidCallback onUpdate;
 
   const _AnimalMenuButton({
+    required this.l10n,
     required this.onViewDetails,
     required this.onUpdate,
   });
@@ -548,7 +530,7 @@ class _AnimalMenuButtonState extends State<_AnimalMenuButton> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: PopupMenuButton<String>(
-        tooltip: 'Options',
+        tooltip: widget.l10n.options,
         icon: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.all(6),
@@ -567,26 +549,26 @@ class _AnimalMenuButtonState extends State<_AnimalMenuButton> {
           if (value == 'update') widget.onUpdate();
         },
         itemBuilder: (_) => [
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'view',
             child: Row(
               children: [
-                Icon(Icons.visibility_outlined,
+                const Icon(Icons.visibility_outlined,
                     color: AppTheme.primaryGreen, size: 20),
-                SizedBox(width: 10),
-                Text('View Details',
-                    style: TextStyle(fontWeight: FontWeight.w500)),
+                const SizedBox(width: 10),
+                Text(widget.l10n.viewDetails,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
               ],
             ),
           ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'update',
             child: Row(
               children: [
-                Icon(Icons.edit_outlined, color: Colors.orange, size: 20),
-                SizedBox(width: 10),
-                Text('Update',
-                    style: TextStyle(fontWeight: FontWeight.w500)),
+                const Icon(Icons.edit_outlined, color: Colors.orange, size: 20),
+                const SizedBox(width: 10),
+                Text(widget.l10n.update,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -596,7 +578,6 @@ class _AnimalMenuButtonState extends State<_AnimalMenuButton> {
   }
 }
 
-// ─── Info line widget (icon + label + value) ─────────────────────────────────
 class _InfoLine extends StatelessWidget {
   final IconData icon;
   final String label;
