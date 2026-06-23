@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/animal_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddAnimalScreen extends ConsumerStatefulWidget {
   const AddAnimalScreen({super.key});
@@ -22,7 +23,7 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
   final _notesController = TextEditingController();
   String _selectedType = AppConstants.animalTypes.first;
   String _selectedGender = 'Male';
-  String? _selectedParentId; // Item 9: optional parent
+  String? _selectedParentId;
   bool _isLoading = false;
 
   @override
@@ -57,11 +58,12 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
     setState(() => _isLoading = false);
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(context, 'Animal added successfully!');
+        AppUtils.showSnackBar(context, l10n.animalAddedSuccess);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to add animal', isError: true);
+        AppUtils.showSnackBar(context, l10n.animalAddFailed, isError: true);
       }
     }
   }
@@ -69,12 +71,12 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
   @override
   Widget build(BuildContext context) {
     final animalState = ref.watch(animalProvider);
-    // Only active animals can be parents
+    final l10n = AppLocalizations.of(context);
     final potentialParents =
         animalState.animals.where((a) => a.status == 'active').toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Animal')),
+      appBar: AppBar(title: Text(l10n.addAnimal)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -82,12 +84,11 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Animal Type
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Animal Type *',
-                  prefixIcon: Icon(Icons.pets),
+                decoration: InputDecoration(
+                  labelText: l10n.animalTypeRequired,
+                  prefixIcon: const Icon(Icons.pets),
                 ),
                 items: AppConstants.animalTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -95,51 +96,43 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
                 onChanged: (val) => setState(() => _selectedType = val!),
               ),
               const SizedBox(height: 12),
-
-              // Optional name/tag
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name / Tag (optional)',
-                  prefixIcon: Icon(Icons.label_outline),
+                decoration: InputDecoration(
+                  labelText: l10n.nameTagOptional,
+                  prefixIcon: const Icon(Icons.label_outline),
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Breed
               TextFormField(
                 controller: _breedController,
-                decoration: const InputDecoration(
-                  labelText: 'Breed',
-                  prefixIcon: Icon(Icons.category_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.breed,
+                  prefixIcon: const Icon(Icons.category_outlined),
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Gender
               DropdownButtonFormField<String>(
                 initialValue: _selectedGender,
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                  prefixIcon: Icon(Icons.transgender),
+                decoration: InputDecoration(
+                  labelText: l10n.gender,
+                  prefixIcon: const Icon(Icons.transgender),
                 ),
-                items: ['Male', 'Female']
+                items: [l10n.male, l10n.female]
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),
                 onChanged: (val) => setState(() => _selectedGender = val!),
               ),
               const SizedBox(height: 12),
-
-              // Age and Weight in a row
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _ageController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Age (months)',
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.ageMonths,
+                        prefixIcon: const Icon(Icons.calendar_today_outlined),
                       ),
                     ),
                   ),
@@ -148,41 +141,37 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
                     child: TextFormField(
                       controller: _weightController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Weight (kg)',
-                        prefixIcon: Icon(Icons.monitor_weight_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.weightKg,
+                        prefixIcon: const Icon(Icons.monitor_weight_outlined),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Purchase Cost
               TextFormField(
                 controller: _costController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Purchase Cost *',
-                  prefixIcon: Icon(Icons.attach_money),
+                decoration: InputDecoration(
+                  labelText: l10n.purchaseCostRequired,
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Cost is required' : null,
+                    (val == null || val.isEmpty) ? l10n.costRequired : null,
               ),
               const SizedBox(height: 12),
-
-              // Item 9: Optional parent selection
               if (potentialParents.isNotEmpty) ...[
                 DropdownButtonFormField<String?>(
                   initialValue: _selectedParentId,
-                  decoration: const InputDecoration(
-                    labelText: 'Parent Animal (if born on farm)',
-                    prefixIcon: Icon(Icons.family_restroom),
-                    helperText: 'Optional — select if this is a born animal',
+                  decoration: InputDecoration(
+                    labelText: l10n.parentAnimal,
+                    prefixIcon: const Icon(Icons.family_restroom),
+                    helperText: l10n.parentAnimalHelper,
                   ),
                   items: [
-                    const DropdownMenuItem<String?>(
-                        value: null, child: Text('— None —')),
+                    DropdownMenuItem<String?>(
+                        value: null, child: Text(l10n.noneOption)),
                     ...potentialParents.map((a) => DropdownMenuItem<String?>(
                           value: a.id,
                           child: Text(
@@ -195,19 +184,16 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
                 ),
                 const SizedBox(height: 12),
               ],
-
-              // Notes
               TextFormField(
                 controller: _notesController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  prefixIcon: Icon(Icons.notes),
+                decoration: InputDecoration(
+                  labelText: l10n.notesOptional,
+                  prefixIcon: const Icon(Icons.notes),
                   alignLabelWithHint: true,
                 ),
               ),
               const SizedBox(height: 24),
-
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
@@ -217,7 +203,7 @@ class _AddAnimalScreenState extends ConsumerState<AddAnimalScreen> {
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text('Add Animal'),
+                    : Text(l10n.addAnimal),
               ),
             ],
           ),
