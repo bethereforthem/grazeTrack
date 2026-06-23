@@ -3,13 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../chat_provider.dart';
 import '../../../core/theme/app_theme.dart';
-
-// ─── Chat List Screen ─────────────────────────────────────────────────────────
-//
-// Two tabs:
-//   "Chats"   — existing conversations, sorted by most recent message
-//   "Farmers" — farmers you have already communicated with; tap "Find Farmers"
-//               to discover new ones via a bottom sheet
+import '../../../l10n/app_localizations.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -44,18 +38,19 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: Text(l10n.chatTitle),
         automaticallyImplyLeading: false,
         bottom: TabBar(
           controller: _tabs,
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.chat_bubble_outline), text: 'Chats'),
-            Tab(icon: Icon(Icons.people_outline), text: 'Farmers'),
+          tabs: [
+            Tab(icon: const Icon(Icons.chat_bubble_outline), text: l10n.chatsTab),
+            Tab(icon: const Icon(Icons.people_outline), text: l10n.farmersTab),
           ],
         ),
       ),
@@ -70,14 +65,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
   }
 }
 
-// ─── Tab 1: Existing Conversations ───────────────────────────────────────────
-
 class _ChatsTab extends ConsumerWidget {
   const _ChatsTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(chatProvider);
+    final l10n = AppLocalizations.of(context);
 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -91,19 +85,16 @@ class _ChatsTab extends ConsumerWidget {
             Icon(Icons.chat_bubble_outline, size: 64,
                 color: Colors.grey[400]),
             const SizedBox(height: 12),
-            const Text('No conversations yet',
-                style: TextStyle(fontSize: 17, color: Colors.grey)),
+            Text(l10n.noConversations,
+                style: const TextStyle(fontSize: 17, color: Colors.grey)),
             const SizedBox(height: 6),
-            const Text('Go to the Farmers tab to start a chat',
-                style: TextStyle(fontSize: 13, color: Colors.grey)),
+            Text(l10n.goToFarmersTab,
+                style: const TextStyle(fontSize: 13, color: Colors.grey)),
           ],
         ),
       );
     }
 
-    // Deduplicate: show one entry per unique other user (most recent thread).
-    // The backend already deduplicates, but this is a client-side safety net
-    // in case older threads are cached locally.
     final seen = <String>{};
     final unique = state.threads
         .where((t) =>
@@ -129,6 +120,7 @@ class _ThreadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name    = thread['otherUserName'] ?? 'Farmer';
     final lastMsg = thread['lastMessage'] ?? '';
     final lastAt  = thread['lastMessageAt'] ?? '';
@@ -161,7 +153,7 @@ class _ThreadTile extends StatelessWidget {
       ),
       subtitle: Text(
         lastMsg.isEmpty
-            ? (isDirect ? 'Direct message' : 'New conversation')
+            ? (isDirect ? l10n.directMessage : l10n.newConversation)
             : lastMsg,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -192,20 +184,14 @@ class _ThreadTile extends StatelessWidget {
   }
 }
 
-// ─── Tab 2: Contacted Farmers ─────────────────────────────────────────────────
-//
-// Shows only farmers the current user has already communicated with.
-// A "Find Farmers" button opens a bottom sheet with all active farmers
-// so the user can start new conversations.
-
 class _FarmersTab extends ConsumerWidget {
   const _FarmersTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(chatProvider);
+    final l10n = AppLocalizations.of(context);
 
-    // Derive unique contacted farmers from existing threads
     final seen = <String>{};
     final contacted = state.threads
         .where((t) =>
@@ -226,13 +212,12 @@ class _FarmersTab extends ConsumerWidget {
 
     return Column(
       children: [
-        // ── Find new farmers button ──────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
           child: OutlinedButton.icon(
             onPressed: () => _showFindFarmersSheet(context, ref),
             icon: const Icon(Icons.search, size: 18),
-            label: const Text('Find Farmers to Chat'),
+            label: Text(l10n.findFarmersToChat),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 44),
               foregroundColor: AppTheme.primaryGreen,
@@ -243,7 +228,6 @@ class _FarmersTab extends ConsumerWidget {
           ),
         ),
 
-        // ── List of contacted farmers ────────────────────────────────
         Expanded(
           child: contacted.isEmpty
               ? Center(
@@ -253,14 +237,14 @@ class _FarmersTab extends ConsumerWidget {
                       Icon(Icons.people_outline,
                           size: 64, color: Colors.grey[400]),
                       const SizedBox(height: 12),
-                      const Text('No farmers contacted yet',
-                          style: TextStyle(
+                      Text(l10n.noFarmersContactedYet,
+                          style: const TextStyle(
                               fontSize: 17, color: Colors.grey)),
                       const SizedBox(height: 6),
-                      const Text(
-                          'Tap "Find Farmers" above to start a conversation',
-                          style: TextStyle(
-                              fontSize: 13, color: Colors.grey)),
+                      Text(l10n.tapFindFarmers,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.grey),
+                          textAlign: TextAlign.center),
                     ],
                   ),
                 )
@@ -292,13 +276,13 @@ class _FarmersTab extends ConsumerWidget {
   }
 }
 
-// Tile for a farmer you've already chatted with — navigates to existing thread
 class _ContactedFarmerTile extends StatelessWidget {
   final Map<String, dynamic> farmer;
   const _ContactedFarmerTile({required this.farmer});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name     = farmer['name'] as String? ?? 'Farmer';
     final lastMsg  = farmer['lastMessage'] as String? ?? '';
     final lastAt   = farmer['lastMessageAt'] as String? ?? '';
@@ -329,7 +313,7 @@ class _ContactedFarmerTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(
-        lastMsg.isEmpty ? 'Tap to continue conversation' : lastMsg,
+        lastMsg.isEmpty ? l10n.tapToContinueConversation : lastMsg,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 13),
@@ -360,14 +344,13 @@ class _ContactedFarmerTile extends StatelessWidget {
   }
 }
 
-// ─── Bottom Sheet: Find New Farmers ──────────────────────────────────────────
-
 class _FindFarmersSheet extends ConsumerWidget {
   const _FindFarmersSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(chatProvider);
+    final l10n = AppLocalizations.of(context);
 
     return DraggableScrollableSheet(
       expand: false,
@@ -375,7 +358,6 @@ class _FindFarmersSheet extends ConsumerWidget {
       maxChildSize: 0.95,
       builder: (_, scrollController) => Column(
         children: [
-          // Handle bar
           Container(
             width: 40,
             height: 4,
@@ -385,8 +367,8 @@ class _FindFarmersSheet extends ConsumerWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Text('Find Farmers',
-              style: TextStyle(
+          Text(l10n.findFarmers,
+              style: const TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Expanded(
@@ -400,8 +382,8 @@ class _FindFarmersSheet extends ConsumerWidget {
                             Icon(Icons.people_outline,
                                 size: 56, color: Colors.grey[400]),
                             const SizedBox(height: 12),
-                            const Text('No other farmers found',
-                                style: TextStyle(
+                            Text(l10n.noOtherFarmersFound,
+                                style: const TextStyle(
                                     fontSize: 16, color: Colors.grey)),
                             const SizedBox(height: 8),
                             TextButton.icon(
@@ -409,7 +391,7 @@ class _FindFarmersSheet extends ConsumerWidget {
                                   .read(chatProvider.notifier)
                                   .loadFarmers(),
                               icon: const Icon(Icons.refresh),
-                              label: const Text('Refresh'),
+                              label: Text(l10n.retry),
                             ),
                           ],
                         ),
@@ -428,8 +410,6 @@ class _FindFarmersSheet extends ConsumerWidget {
     );
   }
 }
-
-// ─── Farmer Tile (for "Find Farmers" sheet) ───────────────────────────────────
 
 class _FarmerTile extends ConsumerStatefulWidget {
   final Map<String, dynamic> farmer;
@@ -453,10 +433,9 @@ class _FarmerTileState extends ConsumerState<_FarmerTile> {
     setState(() => _opening = false);
 
     if (threadId != null) {
-      // Reload threads so the new contact appears in the Farmers tab
       ref.read(chatProvider.notifier).loadThreads();
       if (context.mounted) {
-        Navigator.of(context).pop(); // close the bottom sheet
+        Navigator.of(context).pop();
         context.push(
           '/chat/thread/$threadId',
           extra: {'sellerName': widget.farmer['name'] ?? 'Farmer'},
@@ -464,9 +443,9 @@ class _FarmerTileState extends ConsumerState<_FarmerTile> {
       }
     } else {
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Could not open chat. Please try again.')),
+          SnackBar(content: Text(l10n.couldNotOpenChat)),
         );
       }
     }
