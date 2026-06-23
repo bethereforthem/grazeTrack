@@ -6,6 +6,7 @@ import '../models/health_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 class HealthListScreen extends ConsumerStatefulWidget {
   const HealthListScreen({super.key});
@@ -47,7 +48,6 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
 
   List<HealthModel> _filtered(List<HealthModel> all) {
     return all.where((rec) {
-      // Search: matches type, vaccination, description, or vet name
       final q = _searchQuery.toLowerCase();
       final matchesSearch = q.isEmpty ||
           rec.type.toLowerCase().contains(q) ||
@@ -55,16 +55,10 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
           rec.description.toLowerCase().contains(q) ||
           rec.vet.toLowerCase().contains(q) ||
           rec.animalType.toLowerCase().contains(q);
-
-      // Animal category filter
       final matchesAnimalType = _selectedAnimalType == 'All' ||
-          rec.animalType.toLowerCase() ==
-              _selectedAnimalType.toLowerCase();
-
-      // Health status filter
+          rec.animalType.toLowerCase() == _selectedAnimalType.toLowerCase();
       final matchesStatus = _selectedStatus == 'All' ||
           rec.status.toLowerCase() == _selectedStatus.toLowerCase();
-
       return matchesSearch && matchesAnimalType && matchesStatus;
     }).toList();
   }
@@ -72,13 +66,13 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(healthProvider);
+    final l10n = AppLocalizations.of(context);
     final filtered = _filtered(state.records);
-    final hasFilter =
-        _selectedAnimalType != 'All' || _selectedStatus != 'All';
+    final hasFilter = _selectedAnimalType != 'All' || _selectedStatus != 'All';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Health Records'),
+        title: Text(l10n.healthRecordsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -88,14 +82,13 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
       ),
       body: Column(
         children: [
-          // ─── Search bar ──────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v.trim()),
               decoration: InputDecoration(
-                hintText: 'Search by type, vaccination, vet…',
+                hintText: l10n.searchHealthRecords,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -107,8 +100,8 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                       )
                     : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10, horizontal: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10)),
                 filled: true,
@@ -117,42 +110,37 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
-          // ─── Filter chips row ────────────────────────────────────
           SizedBox(
             height: 38,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
-                // Animal type filter
                 _FilterDropdown(
                   icon: Icons.pets,
                   value: _selectedAnimalType,
-                  items: const ['All', ...AppConstants.animalTypes],
-                  onChanged: (v) =>
-                      setState(() => _selectedAnimalType = v!),
+                  items: [l10n.all, ...AppConstants.animalTypes],
+                  onChanged: (v) => setState(() => _selectedAnimalType = v!),
                 ),
                 const SizedBox(width: 8),
-                // Health status filter
                 _FilterDropdown(
                   icon: Icons.health_and_safety_outlined,
                   value: _selectedStatus,
-                  items: const [
-                    'All',
-                    'Healthy',
-                    'Sick',
-                    'Recovering',
-                    'Critical',
+                  items: [
+                    l10n.all,
+                    l10n.healthy,
+                    l10n.sick,
+                    l10n.recovering,
+                    l10n.critical,
                   ],
                   onChanged: (v) => setState(() => _selectedStatus = v!),
                 ),
-                // Clear filters button
                 if (hasFilter) ...[
                   const SizedBox(width: 8),
                   ActionChip(
                     avatar: const Icon(Icons.clear, size: 14),
-                    label: const Text('Clear', style: TextStyle(fontSize: 12)),
+                    label: Text(l10n.clear,
+                        style: const TextStyle(fontSize: 12)),
                     onPressed: () => setState(() {
                       _selectedAnimalType = 'All';
                       _selectedStatus = 'All';
@@ -163,28 +151,21 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
             ),
           ),
           const SizedBox(height: 6),
-
-          // ─── Results count ───────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Text(
                   '${filtered.length} record${filtered.length == 1 ? '' : 's'}',
-                  style:
-                      const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                if (hasFilter || _searchQuery.isNotEmpty) ...[
-                  const Text(' — filtered',
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
+                if (hasFilter || _searchQuery.isNotEmpty)
+                  Text(' — ${l10n.filtered}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
               ],
             ),
           ),
           const SizedBox(height: 4),
-
-          // ─── List ────────────────────────────────────────────────
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -198,8 +179,8 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                             const SizedBox(height: 12),
                             Text(
                               state.records.isEmpty
-                                  ? 'No health records yet'
-                                  : 'No records match your filters',
+                                  ? l10n.noHealthRecords
+                                  : l10n.noRecordsMatchFilter,
                               style: const TextStyle(
                                   fontSize: 15, color: Colors.grey),
                             ),
@@ -215,15 +196,12 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                           itemBuilder: (ctx, i) {
                             final rec = filtered[i];
                             return Card(
-                              margin:
-                                  const EdgeInsets.only(bottom: 10),
+                              margin: const EdgeInsets.only(bottom: 10),
                               child: ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor:
-                                      _statusColor(rec.status)
-                                          .withAlpha(30),
-                                  child: Icon(
-                                      Icons.medical_services_outlined,
+                                      _statusColor(rec.status).withAlpha(30),
+                                  child: Icon(Icons.medical_services_outlined,
                                       color: _statusColor(rec.status)),
                                 ),
                                 title: Row(
@@ -231,15 +209,12 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                                     Expanded(
                                       child: Text(rec.type,
                                           style: const TextStyle(
-                                              fontWeight:
-                                                  FontWeight.w600)),
+                                              fontWeight: FontWeight.w600)),
                                     ),
                                     if (rec.animalType.isNotEmpty)
                                       Container(
-                                        padding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: AppTheme.backgroundGreen,
                                           borderRadius:
@@ -249,10 +224,8 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                                           rec.animalType,
                                           style: const TextStyle(
                                               fontSize: 10,
-                                              color:
-                                                  AppTheme.primaryGreen,
-                                              fontWeight:
-                                                  FontWeight.w500),
+                                              color: AppTheme.primaryGreen,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                   ],
@@ -262,10 +235,8 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                                     '${AppUtils.formatDate(rec.date)}'),
                                 isThreeLine: true,
                                 trailing: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
                                       AppUtils.formatCurrency(rec.cost),
@@ -285,8 +256,7 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
                                       child: Text(
                                         rec.status.toUpperCase(),
                                         style: const TextStyle(
-                                            fontSize: 9,
-                                            color: Colors.white),
+                                            fontSize: 9, color: Colors.white),
                                       ),
                                     ),
                                   ],
@@ -303,14 +273,13 @@ class _HealthListScreenState extends ConsumerState<HealthListScreen> {
         onPressed: () => context.push('/health/add'),
         backgroundColor: AppTheme.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label:
-            const Text('Add Record', style: TextStyle(color: Colors.white)),
+        label: Text(l10n.addRecord,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
 }
 
-// ─── Reusable compact filter dropdown ────────────────────────────────────────
 class _FilterDropdown extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -326,13 +295,12 @@ class _FilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = value != 'All';
+    final allLabel = AppLocalizations.of(context).all;
+    final isActive = value != 'All' && value != allLabel;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppTheme.primaryGreen.withAlpha(20)
-            : Colors.grey.shade100,
+        color: isActive ? AppTheme.primaryGreen.withAlpha(20) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: isActive
@@ -347,8 +315,7 @@ class _FilterDropdown extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             color: isActive ? AppTheme.primaryGreen : Colors.black87,
-            fontWeight:
-                isActive ? FontWeight.bold : FontWeight.normal,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
           items: items
               .map((t) => DropdownMenuItem(value: t, child: Text(t)))
