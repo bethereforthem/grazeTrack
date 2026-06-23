@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../auth_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
-// Login Screen — first screen users see when not logged in
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,7 +39,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go('/dashboard');
       } else {
         final error = ref.read(authProvider).error;
-        AppUtils.showSnackBar(context, error ?? 'Login failed', isError: true);
+        final l10n = AppLocalizations.of(context);
+        AppUtils.showSnackBar(context, error ?? l10n.login, isError: true);
       }
     }
   }
@@ -47,6 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -61,10 +63,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 48),
 
                 // ─── Logo & Title ──────────────────────────────
-                const Center(
+                Center(
                   child: Column(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 52,
                         backgroundColor: AppTheme.backgroundGreen,
                         child: Icon(
@@ -73,18 +75,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: AppTheme.primaryGreen,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
-                        'GrazeTrack',
-                        style: TextStyle(
+                        l10n.appName,
+                        style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryGreen,
                         ),
                       ),
                       Text(
-                        'Smart Livestock Management',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                        l10n.smartLivestockManagement,
+                        style: const TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                     ],
                   ),
@@ -95,13 +97,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.emailAddress,
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   validator: (val) {
-                    if (val == null || val.isEmpty) return 'Email is required';
-                    if (!val.contains('@')) return 'Enter a valid email';
+                    if (val == null || val.isEmpty) return l10n.emailRequired;
+                    if (!val.contains('@')) return l10n.emailInvalid;
                     return null;
                   },
                 ),
@@ -112,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword
@@ -123,8 +125,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   validator: (val) {
-                    if (val == null || val.isEmpty) return 'Password is required';
-                    if (val.length < 6) return 'Min 6 characters';
+                    if (val == null || val.isEmpty) return l10n.passwordRequired;
+                    if (val.length < 6) return l10n.passwordMinLength;
                     return null;
                   },
                 ),
@@ -140,7 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2),
                         )
-                      : const Text('Login'),
+                      : Text(l10n.login),
                 ),
                 const SizedBox(height: 16),
 
@@ -148,12 +150,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account? "),
+                    Text('${l10n.noAccount} '),
                     TextButton(
                       onPressed: () => context.go('/signup'),
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.signUp,
+                        style: const TextStyle(
                           color: AppTheme.primaryGreen,
                           fontWeight: FontWeight.bold,
                         ),
