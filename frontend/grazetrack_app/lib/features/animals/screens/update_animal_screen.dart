@@ -6,6 +6,7 @@ import '../models/animal_model.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class UpdateAnimalScreen extends ConsumerStatefulWidget {
   final String animalId;
@@ -58,7 +59,6 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    // purchaseCost is NOT included — it is fixed at the original value
     final success = await ref.read(animalProvider.notifier).updateAnimal(
       animal.id,
       {
@@ -76,18 +76,19 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
     setState(() => _isLoading = false);
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(context, 'Animal updated successfully!');
+        AppUtils.showSnackBar(context, l10n.animalUpdatedSuccess);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to update animal',
-            isError: true);
+        AppUtils.showSnackBar(context, l10n.animalUpdateFailed, isError: true);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(animalProvider);
     AnimalModel? animal;
     try {
@@ -96,18 +97,17 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
 
     if (animal == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Update Animal')),
+        appBar: AppBar(title: Text(l10n.updateAnimalTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     _initFromAnimal(animal);
 
-    // Lock down the purchase cost to display only
     final fixedCost = AppUtils.formatCurrency(animal.purchaseCost);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Animal')),
+      appBar: AppBar(title: Text(l10n.updateAnimalTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -115,7 +115,6 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ─── Purchase cost — read-only notice ──────────────────────
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -132,8 +131,8 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Purchase Cost (fixed)',
-                              style: TextStyle(
+                          Text(l10n.purchaseCostFixed,
+                              style: const TextStyle(
                                   fontSize: 12, color: Colors.grey)),
                           Text(
                             fixedCost,
@@ -150,12 +149,11 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ─── Animal Type ───────────────────────────────────────────
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Animal Type *',
-                  prefixIcon: Icon(Icons.pets),
+                decoration: InputDecoration(
+                  labelText: l10n.animalTypeRequired,
+                  prefixIcon: const Icon(Icons.pets),
                 ),
                 items: AppConstants.animalTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -164,68 +162,64 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ─── Name / Tag ────────────────────────────────────────────
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name / Tag (optional)',
-                  prefixIcon: Icon(Icons.label_outline),
+                decoration: InputDecoration(
+                  labelText: l10n.nameTagOptional,
+                  prefixIcon: const Icon(Icons.label_outline),
                 ),
               ),
               const SizedBox(height: 12),
 
-              // ─── Breed ─────────────────────────────────────────────────
               TextFormField(
                 controller: _breedController,
-                decoration: const InputDecoration(
-                  labelText: 'Breed',
-                  prefixIcon: Icon(Icons.category_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.breed,
+                  prefixIcon: const Icon(Icons.category_outlined),
                 ),
               ),
               const SizedBox(height: 12),
 
-              // ─── Gender ────────────────────────────────────────────────
               DropdownButtonFormField<String>(
                 initialValue: _selectedGender,
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                  prefixIcon: Icon(Icons.transgender),
+                decoration: InputDecoration(
+                  labelText: l10n.gender,
+                  prefixIcon: const Icon(Icons.transgender),
                 ),
-                items: ['Male', 'Female']
-                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                    .toList(),
+                items: [
+                  DropdownMenuItem(value: 'Male', child: Text(l10n.male)),
+                  DropdownMenuItem(value: 'Female', child: Text(l10n.female)),
+                ],
                 onChanged: (val) => setState(() => _selectedGender = val!),
               ),
               const SizedBox(height: 12),
 
-              // ─── Status ────────────────────────────────────────────────
               DropdownButtonFormField<String>(
                 initialValue: _selectedStatus,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  prefixIcon: Icon(Icons.info_outline),
+                decoration: InputDecoration(
+                  labelText: l10n.statusLabel,
+                  prefixIcon: const Icon(Icons.info_outline),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'active', child: Text('Active')),
-                  DropdownMenuItem(value: 'sold', child: Text('Sold')),
+                items: [
+                  DropdownMenuItem(value: 'active', child: Text(l10n.active)),
+                  DropdownMenuItem(value: 'sold', child: Text(l10n.sold)),
                   DropdownMenuItem(
-                      value: 'deceased', child: Text('Deceased')),
+                      value: 'deceased', child: Text(l10n.deceased)),
                 ],
                 onChanged: (val) => setState(() => _selectedStatus = val!),
               ),
               const SizedBox(height: 12),
 
-              // ─── Age & Weight ──────────────────────────────────────────
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _ageController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Age (months)',
+                      decoration: InputDecoration(
+                        labelText: l10n.ageMonths,
                         prefixIcon:
-                            Icon(Icons.calendar_today_outlined),
+                            const Icon(Icons.calendar_today_outlined),
                       ),
                     ),
                   ),
@@ -234,10 +228,10 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
                     child: TextFormField(
                       controller: _weightController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Weight (kg)',
+                      decoration: InputDecoration(
+                        labelText: l10n.weightKg,
                         prefixIcon:
-                            Icon(Icons.monitor_weight_outlined),
+                            const Icon(Icons.monitor_weight_outlined),
                       ),
                     ),
                   ),
@@ -245,21 +239,18 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ─── Health Notes ──────────────────────────────────────────
               TextFormField(
                 controller: _notesController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Health / Notes',
-                  hintText:
-                      'e.g. vaccinated, medication, health observations…',
-                  prefixIcon: Icon(Icons.health_and_safety_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.healthNotesLabel,
+                  hintText: l10n.healthNotesHint,
+                  prefixIcon: const Icon(Icons.health_and_safety_outlined),
                   alignLabelWithHint: true,
                 ),
               ),
               const SizedBox(height: 24),
 
-              // ─── Save button ───────────────────────────────────────────
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryGreen,
@@ -276,8 +267,8 @@ class _UpdateAnimalScreenState extends ConsumerState<UpdateAnimalScreen> {
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text('Save Changes',
-                        style: TextStyle(fontSize: 16)),
+                    : Text(l10n.saveChanges,
+                        style: const TextStyle(fontSize: 16)),
               ),
             ],
           ),
