@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/feed_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddFeedScreen extends ConsumerStatefulWidget {
   const AddFeedScreen({super.key});
@@ -46,19 +47,21 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
 
     setState(() => _isLoading = false);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       if (success) {
-        AppUtils.showSnackBar(context, 'Feed record added!');
+        AppUtils.showSnackBar(context, l10n.feedRecordAdded);
         context.pop();
       } else {
-        AppUtils.showSnackBar(context, 'Failed to add feed record', isError: true);
+        AppUtils.showSnackBar(context, l10n.feedRecordFailed, isError: true);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Record Feeding')),
+      appBar: AppBar(title: Text(l10n.recordFeedingTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -68,9 +71,9 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
             children: [
               DropdownButtonFormField<String>(
                 initialValue: _selectedAnimalCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Animal Category *',
-                  prefixIcon: Icon(Icons.pets),
+                decoration: InputDecoration(
+                  labelText: l10n.animalCategoryRequired,
+                  prefixIcon: const Icon(Icons.pets),
                 ),
                 items: AppConstants.animalTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -81,9 +84,9 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Feed Type *',
-                  prefixIcon: Icon(Icons.grass),
+                decoration: InputDecoration(
+                  labelText: l10n.feedTypeRequired,
+                  prefixIcon: const Icon(Icons.grass),
                 ),
                 items: AppConstants.feedTypes
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -98,19 +101,19 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
                     child: TextFormField(
                       controller: _quantityController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Quantity *',
-                        prefixIcon: Icon(Icons.scale),
+                      decoration: InputDecoration(
+                        labelText: l10n.quantityRequired,
+                        prefixIcon: const Icon(Icons.scale),
                       ),
                       validator: (val) =>
-                          (val == null || val.isEmpty) ? 'Required' : null,
+                          (val == null || val.isEmpty) ? l10n.required : null,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _selectedUnit,
-                      decoration: const InputDecoration(labelText: 'Unit'),
+                      decoration: InputDecoration(labelText: l10n.unit),
                       items: AppConstants.feedUnits
                           .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                           .toList(),
@@ -123,20 +126,20 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
               TextFormField(
                 controller: _costController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Cost (\$) *',
-                  prefixIcon: Icon(Icons.attach_money),
+                decoration: InputDecoration(
+                  labelText: l10n.costWithSymbol,
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Cost required' : null,
+                    (val == null || val.isEmpty) ? l10n.costFieldRequired : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _notesController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  prefixIcon: Icon(Icons.notes),
+                decoration: InputDecoration(
+                  labelText: l10n.notesOptional,
+                  prefixIcon: const Icon(Icons.notes),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -149,7 +152,7 @@ class _AddFeedScreenState extends ConsumerState<AddFeedScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Save Feed Record'),
+                    : Text(l10n.saveFeedRecord),
               ),
             ],
           ),
