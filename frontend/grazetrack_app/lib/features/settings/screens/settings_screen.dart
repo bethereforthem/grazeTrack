@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/auth_provider.dart';
 import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,73 +15,94 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyState = ref.watch(currencyProvider);
+    final currentLocale = ref.watch(localeProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ─── Account Section ───────────────────────────
-          const _SectionHeader('Account'),
+          _SectionHeader(l10n.accountSection),
           _SettingsTile(
             icon: Icons.person_outlined,
-            title: 'My Profile',
-            subtitle: 'Update your name and phone number',
+            title: l10n.myProfile,
+            subtitle: l10n.updateNamePhone,
             onTap: () => context.push('/profile'),
           ),
           _SettingsTile(
             icon: Icons.lock_outlined,
-            title: 'Change Password',
-            subtitle: 'Update your login password',
-            onTap: () =>
-                AppUtils.showSnackBar(context, 'Navigate to change password screen'),
+            title: l10n.changePassword,
+            subtitle: l10n.updateLoginPassword,
+            onTap: () => AppUtils.showSnackBar(
+                context, l10n.changePasswordTitle),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ─── Language Section ───────────────────────────
+          _SectionHeader(l10n.languageSection),
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: const Icon(Icons.language, color: AppTheme.primaryGreen),
+              title: Text(l10n.language),
+              subtitle: Text(
+                kLocaleNativeNames[currentLocale.languageCode] ?? 'English',
+              ),
+              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              onTap: () => _showLanguagePicker(context, ref, currentLocale, l10n),
+            ),
           ),
 
           const SizedBox(height: 16),
 
           // ─── Currency Section ───────────────────────────
-          const _SectionHeader('Currency'),
+          _SectionHeader(l10n.currencySection),
           Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: const Icon(Icons.currency_exchange, color: AppTheme.primaryGreen),
-              title: const Text('Display Currency'),
+              leading: const Icon(Icons.currency_exchange,
+                  color: AppTheme.primaryGreen),
+              title: Text(l10n.displayCurrency),
               subtitle: Text(
                 '${currencyState.code} — ${currencyState.symbol}  '
-                '${currencyState.isLoading ? "(fetching rates...)" : ""}',
+                '${currencyState.isLoading ? l10n.fetchingRates : ""}',
               ),
               trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-              onTap: () => _showCurrencyPicker(context, ref, currencyState.code),
+              onTap: () =>
+                  _showCurrencyPicker(context, ref, currencyState.code, l10n),
             ),
           ),
 
           const SizedBox(height: 16),
 
           // ─── App Section ───────────────────────────────
-          const _SectionHeader('App'),
+          _SectionHeader(l10n.appSection),
           _SettingsTile(
             icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Manage reminders and alerts',
+            title: l10n.notifications,
+            subtitle: l10n.manageReminders,
             onTap: () => context.push('/notifications'),
           ),
           _SettingsTile(
             icon: Icons.bar_chart,
-            title: 'Reports',
-            subtitle: 'View analytics and insights',
+            title: l10n.reports,
+            subtitle: l10n.viewAnalytics,
             onTap: () => context.go('/reports'),
           ),
 
           const SizedBox(height: 16),
 
           // ─── Network Section ───────────────────────────
-          const _SectionHeader('Network'),
+          _SectionHeader(l10n.networkSection),
           Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: const Icon(Icons.dns_outlined,
                   color: AppTheme.primaryGreen),
-              title: const Text('Server Address'),
+              title: Text(l10n.serverAddress),
               subtitle: Text(
                 AppConstants.baseUrl,
                 style: const TextStyle(fontSize: 11),
@@ -87,30 +110,30 @@ class SettingsScreen extends ConsumerWidget {
               ),
               trailing: const Icon(Icons.edit_outlined,
                   color: Colors.grey, size: 20),
-              onTap: () => _showServerUrlDialog(context),
+              onTap: () => _showServerUrlDialog(context, l10n),
             ),
           ),
 
           const SizedBox(height: 16),
 
           // ─── Support Section ───────────────────────────
-          const _SectionHeader('Support'),
+          _SectionHeader(l10n.supportSection),
           _SettingsTile(
             icon: Icons.help_outline,
-            title: 'Help & FAQ',
-            subtitle: 'Get answers to common questions',
+            title: l10n.helpFaq,
+            subtitle: l10n.getAnswers,
             onTap: () => context.push('/help-faq'),
           ),
           _SettingsTile(
             icon: Icons.support_agent_outlined,
-            title: 'Contact Support',
-            subtitle: 'Chat, email, or call our team',
+            title: l10n.contactSupport,
+            subtitle: l10n.chatEmailCallTeam,
             onTap: () => context.push('/contact'),
           ),
-          const _SettingsTile(
+          _SettingsTile(
             icon: Icons.info_outline,
-            title: 'App Version',
-            subtitle: 'GrazeTrack v1.0.0',
+            title: l10n.appVersion,
+            subtitle: l10n.appVersionValue,
             onTap: null,
           ),
 
@@ -121,9 +144,9 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () async {
               final confirm = await AppUtils.showConfirmDialog(
                 context,
-                title: 'Logout',
-                message: 'Are you sure you want to logout?',
-                confirmText: 'Logout',
+                title: l10n.logout,
+                message: l10n.logoutConfirm,
+                confirmText: l10n.logout,
               );
               if (confirm) {
                 await ref.read(authProvider.notifier).logout();
@@ -131,14 +154,14 @@ class SettingsScreen extends ConsumerWidget {
               }
             },
             icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text('Logout',
-                style: TextStyle(color: Colors.red, fontSize: 16)),
+            label: Text(l10n.logout,
+                style: const TextStyle(color: Colors.red, fontSize: 16)),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 52),
               side: const BorderSide(color: Colors.red),
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ],
@@ -146,20 +169,85 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showServerUrlDialog(BuildContext context) {
-    final ctrl =
-        TextEditingController(text: AppConstants.baseUrl);
+  void _showLanguagePicker(BuildContext context, WidgetRef ref,
+      Locale currentLocale, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) {
+        final languages = [
+          {'code': 'en', 'name': l10n.english, 'native': 'English'},
+          {'code': 'fr', 'name': l10n.french, 'native': 'Français'},
+          {'code': 'rw', 'name': l10n.kinyarwanda, 'native': 'Ikinyarwanda'},
+        ];
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(l10n.selectLanguage,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.bold)),
+            ),
+            const Divider(height: 1),
+            ...languages.map((lang) {
+              final isSelected =
+                  currentLocale.languageCode == lang['code'];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: isSelected
+                      ? AppTheme.primaryGreen
+                      : AppTheme.backgroundGreen,
+                  child: Text(
+                    (lang['code'] as String).toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: isSelected
+                            ? Colors.white
+                            : AppTheme.primaryGreen,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                title: Text(lang['native'] as String,
+                    style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal)),
+                subtitle: Text(lang['name'] as String,
+                    style: const TextStyle(fontSize: 12)),
+                trailing: isSelected
+                    ? const Icon(Icons.check, color: AppTheme.primaryGreen)
+                    : null,
+                onTap: () {
+                  ref
+                      .read(localeProvider.notifier)
+                      .setLocale(Locale(lang['code'] as String));
+                  Navigator.pop(context);
+                  AppUtils.showSnackBar(context, l10n.languageChanged);
+                },
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showServerUrlDialog(BuildContext context, AppLocalizations l10n) {
+    final ctrl = TextEditingController(text: AppConstants.baseUrl);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Server Address'),
+        title: Text(l10n.serverAddress),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Enter your PC\'s local IP address.\nExample: http://192.168.1.x:5000/api/v1',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              l10n.serverAddressInstruction,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -180,15 +268,15 @@ class SettingsScreen extends ConsumerWidget {
               if (ctx.mounted) {
                 Navigator.pop(ctx);
                 AppUtils.showSnackBar(
-                    context, 'Reset to default: ${AppConstants.baseUrl}');
+                    context, l10n.resetToDefault(AppConstants.baseUrl));
               }
             },
-            child: const Text('Reset',
-                style: TextStyle(color: Colors.grey)),
+            child: Text(l10n.reset,
+                style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -197,18 +285,18 @@ class SettingsScreen extends ConsumerWidget {
               await AppConstants.saveServerUrl(url);
               if (ctx.mounted) {
                 Navigator.pop(ctx);
-                AppUtils.showSnackBar(context, 'Server address updated');
+                AppUtils.showSnackBar(context, l10n.serverAddressUpdated);
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
     );
   }
 
-  void _showCurrencyPicker(
-      BuildContext context, WidgetRef ref, String currentCode) {
+  void _showCurrencyPicker(BuildContext context, WidgetRef ref,
+      String currentCode, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -216,10 +304,11 @@ class SettingsScreen extends ConsumerWidget {
       builder: (_) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('Select Currency',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(l10n.selectCurrency,
+                style: const TextStyle(
+                    fontSize: 17, fontWeight: FontWeight.bold)),
           ),
           const Divider(height: 1),
           Flexible(
@@ -256,7 +345,7 @@ class SettingsScreen extends ConsumerWidget {
                         .selectCurrency(entry.key);
                     Navigator.pop(context);
                     AppUtils.showSnackBar(
-                        context, 'Currency changed to ${entry.key}');
+                        context, l10n.currencyChanged(entry.key));
                   },
                 );
               }).toList(),
