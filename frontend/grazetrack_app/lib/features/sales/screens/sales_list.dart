@@ -6,6 +6,7 @@ import '../models/sale_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SalesListScreen extends ConsumerStatefulWidget {
   const SalesListScreen({super.key});
@@ -18,7 +19,7 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedAnimalType = 'All';
-  String _selectedResult = 'All'; // All / Profit / Loss
+  String _selectedResult = 'All';
 
   @override
   void initState() {
@@ -40,15 +41,11 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
           sale.animalBreed.toLowerCase().contains(q) ||
           sale.buyerName.toLowerCase().contains(q) ||
           sale.notes.toLowerCase().contains(q);
-
       final matchesType = _selectedAnimalType == 'All' ||
-          sale.animalType.toLowerCase() ==
-              _selectedAnimalType.toLowerCase();
-
+          sale.animalType.toLowerCase() == _selectedAnimalType.toLowerCase();
       final matchesResult = _selectedResult == 'All' ||
           (_selectedResult == 'Profit' && sale.isProfit) ||
           (_selectedResult == 'Loss' && !sale.isProfit);
-
       return matchesSearch && matchesType && matchesResult;
     }).toList();
   }
@@ -56,15 +53,14 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(salesProvider);
+    final l10n = AppLocalizations.of(context);
     final filtered = _filtered(state.sales);
-    final totalProfit =
-        filtered.fold<double>(0, (s, e) => s + e.profit);
-    final hasFilter =
-        _selectedAnimalType != 'All' || _selectedResult != 'All';
+    final totalProfit = filtered.fold<double>(0, (s, e) => s + e.profit);
+    final hasFilter = _selectedAnimalType != 'All' || _selectedResult != 'All';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sales'),
+        title: Text(l10n.salesTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -74,14 +70,13 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
       ),
       body: Column(
         children: [
-          // ─── Search bar ──────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v.trim()),
               decoration: InputDecoration(
-                hintText: 'Search by animal, breed, buyer…',
+                hintText: l10n.searchSales,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -93,8 +88,8 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                       )
                     : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10, horizontal: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10)),
                 filled: true,
@@ -103,37 +98,31 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
-          // ─── Filter chips ────────────────────────────────────────
           SizedBox(
             height: 38,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
-                // Animal type filter
                 _FilterDropdown(
                   icon: Icons.pets,
                   value: _selectedAnimalType,
-                  items: const ['All', ...AppConstants.animalTypes],
-                  onChanged: (v) =>
-                      setState(() => _selectedAnimalType = v!),
+                  items: [l10n.all, ...AppConstants.animalTypes],
+                  onChanged: (v) => setState(() => _selectedAnimalType = v!),
                 ),
                 const SizedBox(width: 8),
-                // Profit / Loss filter
                 _FilterDropdown(
                   icon: Icons.trending_up,
                   value: _selectedResult,
-                  items: const ['All', 'Profit', 'Loss'],
-                  onChanged: (v) =>
-                      setState(() => _selectedResult = v!),
+                  items: [l10n.all, l10n.profit, l10n.loss],
+                  onChanged: (v) => setState(() => _selectedResult = v!),
                 ),
                 if (hasFilter) ...[
                   const SizedBox(width: 8),
                   ActionChip(
                     avatar: const Icon(Icons.clear, size: 14),
-                    label: const Text('Clear',
-                        style: TextStyle(fontSize: 12)),
+                    label: Text(l10n.clear,
+                        style: const TextStyle(fontSize: 12)),
                     onPressed: () => setState(() {
                       _selectedAnimalType = 'All';
                       _selectedResult = 'All';
@@ -144,30 +133,23 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
             ),
           ),
           const SizedBox(height: 4),
-
-          // ─── Profit / Loss summary banner ────────────────────────
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: totalProfit >= 0
-                ? AppTheme.primaryGreen
-                : AppTheme.lossRed,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: totalProfit >= 0 ? AppTheme.primaryGreen : AppTheme.lossRed,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${filtered.length} sale${filtered.length == 1 ? '' : 's'}${hasFilter || _searchQuery.isNotEmpty ? ' (filtered)' : ''}',
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 12),
+                  '${filtered.length} sale${filtered.length == 1 ? '' : 's'}${hasFilter || _searchQuery.isNotEmpty ? ' (${l10n.filtered})' : ''}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      totalProfit >= 0 ? 'Total Profit' : 'Total Loss',
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 11),
+                      totalProfit >= 0 ? l10n.totalProfitLabel : l10n.totalLossLabel,
+                      style: const TextStyle(color: Colors.white70, fontSize: 11),
                     ),
                     Text(
                       AppUtils.formatCurrency(totalProfit.abs()),
@@ -181,8 +163,6 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
               ],
             ),
           ),
-
-          // ─── Sales list ──────────────────────────────────────────
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -196,8 +176,8 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                             const SizedBox(height: 12),
                             Text(
                               state.sales.isEmpty
-                                  ? 'No sales yet'
-                                  : 'No sales match your filters',
+                                  ? l10n.noSalesYet
+                                  : l10n.noSalesMatchFilter,
                               style: const TextStyle(
                                   fontSize: 15, color: Colors.grey),
                             ),
@@ -213,13 +193,11 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                           itemBuilder: (ctx, i) {
                             final sale = filtered[i];
                             return Card(
-                              margin:
-                                  const EdgeInsets.only(bottom: 12),
+                              margin: const EdgeInsets.only(bottom: 12),
                               child: Padding(
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       mainAxisAlignment:
@@ -232,10 +210,8 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                                               fontSize: 16),
                                         ),
                                         Container(
-                                          padding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
                                             color: sale.isProfit
                                                 ? AppTheme.profitGreen
@@ -245,13 +221,12 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                                           ),
                                           child: Text(
                                             sale.isProfit
-                                                ? 'PROFIT'
-                                                : 'LOSS',
+                                                ? l10n.profitBadge
+                                                : l10n.lossBadge,
                                             style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 11,
-                                                fontWeight:
-                                                    FontWeight.bold),
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -260,19 +235,19 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                                     Row(
                                       children: [
                                         _InfoChip(
-                                            'Sold for',
+                                            l10n.soldFor,
                                             AppUtils.formatCurrency(
                                                 sale.sellingPrice)),
                                         const SizedBox(width: 12),
                                         _InfoChip(
-                                            'Cost',
+                                            l10n.cost,
                                             AppUtils.formatCurrency(
                                                 sale.totalCost)),
                                         const SizedBox(width: 12),
                                         _InfoChip(
                                           sale.isProfit
-                                              ? 'Profit'
-                                              : 'Loss',
+                                              ? l10n.profit
+                                              : l10n.loss,
                                           AppUtils.formatCurrency(
                                               sale.profit.abs()),
                                           color: sale.isProfit
@@ -286,8 +261,7 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
                                       'ROI: ${sale.roi.toStringAsFixed(1)}% • ${AppUtils.formatDate(sale.date)}'
                                       '${sale.buyerName.isNotEmpty ? ' • ${sale.buyerName}' : ''}',
                                       style: const TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12),
+                                          color: Colors.grey, fontSize: 12),
                                     ),
                                   ],
                                 ),
@@ -303,14 +277,13 @@ class _SalesListScreenState extends ConsumerState<SalesListScreen> {
         onPressed: () => context.push('/sales/add'),
         backgroundColor: AppTheme.primaryGreen,
         icon: const Icon(Icons.sell_outlined, color: Colors.white),
-        label: const Text('Record Sale',
-            style: TextStyle(color: Colors.white)),
+        label: Text(l10n.recordSale,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
 }
 
-// ─── Reusable compact filter dropdown ────────────────────────────────────────
 class _FilterDropdown extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -326,13 +299,12 @@ class _FilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = value != 'All';
+    final allLabel = AppLocalizations.of(context).all;
+    final isActive = value != 'All' && value != allLabel;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppTheme.primaryGreen.withAlpha(20)
-            : Colors.grey.shade100,
+        color: isActive ? AppTheme.primaryGreen.withAlpha(20) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: isActive
@@ -347,8 +319,7 @@ class _FilterDropdown extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             color: isActive ? AppTheme.primaryGreen : Colors.black87,
-            fontWeight:
-                isActive ? FontWeight.bold : FontWeight.normal,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
           items: items
               .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -371,8 +342,7 @@ class _InfoChip extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
         Text(value,
             style: TextStyle(
                 fontWeight: FontWeight.bold,
