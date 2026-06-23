@@ -4,18 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../marketplace_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
-
-// ─── Marketplace Screen ───────────────────────────────────────────────────────
-//
-// The main marketplace where farmers browse and discover animals for sale.
-//
-// Sections:
-//   1. Search bar + filter button
-//   2. Animal category chips (Cow, Goat, Sheep, etc.)
-//   3. Featured / Latest / All listings
-//
-// Tapping a listing opens ListingDetailScreen.
-// Tapping a farmer's name opens FarmerProfileScreen.
+import '../../../l10n/app_localizations.dart';
 
 class MarketplaceScreen extends ConsumerStatefulWidget {
   const MarketplaceScreen({super.key});
@@ -29,7 +18,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
   final _searchCtrl = TextEditingController();
   String _selectedType = 'All';
 
-  // Animal categories with emoji icons
   static const _categories = [
     ('All',     '🐾', ''),
     ('Cow',     '🐄', 'Cow'),
@@ -102,23 +90,22 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(marketplaceProvider);
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
-          // ─── Gradient App Bar ─────────────────────────────
           SliverAppBar(
             pinned: true,
             expandedHeight: 60,
             backgroundColor: AppTheme.primaryGreen,
-            title: const Text('Animal Marketplace',
-                style: TextStyle(color: Colors.white)),
+            title: Text(l10n.animalMarketplace,
+                style: const TextStyle(color: Colors.white)),
             actions: [
-              // Filter icon — opens bottom sheet with price/location filters
               IconButton(
                 icon: const Icon(Icons.tune, color: Colors.white),
-                tooltip: 'Advanced Filters',
+                tooltip: l10n.advancedFilters,
                 onPressed: _showFilterSheet,
               ),
             ],
@@ -129,7 +116,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
               ref.read(marketplaceProvider.notifier).loadListings(),
           child: CustomScrollView(
             slivers: [
-              // ─── Search Bar ───────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -139,7 +125,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                         child: TextField(
                           controller: _searchCtrl,
                           decoration: InputDecoration(
-                            hintText: 'Search animals, breeds, farmers…',
+                            hintText: l10n.searchAnimalsBreeds,
                             prefixIcon: const Icon(Icons.search,
                                 color: AppTheme.primaryGreen),
                             suffixIcon: _searchCtrl.text.isNotEmpty
@@ -167,7 +153,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // Search submit button
                       GestureDetector(
                         onTap: _applySearch,
                         child: Container(
@@ -185,7 +170,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                 ),
               ),
 
-              // ─── Category Chips ───────────────────────────
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 82,
@@ -207,7 +191,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                 ),
               ),
 
-              // ─── Result count + active filter badge ───────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -215,7 +198,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                     children: [
                       Text(
                         _selectedType == 'All'
-                            ? 'All Listings'
+                            ? l10n.allListingsLabel
                             : _selectedType,
                         style: const TextStyle(
                             fontSize: 16,
@@ -245,7 +228,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                 ),
               ),
 
-              // ─── Listings ──────────────────────────────────
               if (state.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
@@ -264,7 +246,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                           onPressed: () => ref
                               .read(marketplaceProvider.notifier)
                               .loadListings(),
-                          child: const Text('Retry'),
+                          child: Text(l10n.retry),
                         ),
                       ],
                     ),
@@ -279,11 +261,11 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                         const Icon(Icons.storefront_outlined,
                             size: 64, color: Colors.grey),
                         const SizedBox(height: 12),
-                        const Text('No listings found',
-                            style: TextStyle(
+                        Text(l10n.noListingsFound,
+                            style: const TextStyle(
                                 fontSize: 18, color: Colors.grey)),
-                        const Text('Try a different category or filter',
-                            style: TextStyle(color: Colors.grey)),
+                        Text(l10n.tryDifferentCategory,
+                            style: const TextStyle(color: Colors.grey)),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () {
@@ -293,7 +275,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                                 .clearFilters();
                           },
                           icon: const Icon(Icons.clear_all),
-                          label: const Text('Clear Filters'),
+                          label: Text(l10n.clearFilters),
                         ),
                       ],
                     ),
@@ -314,18 +296,16 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
         ),
       ),
 
-      // FAB — create a new listing
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/my-listings/create'),
         icon: const Icon(Icons.add),
-        label: const Text('Sell Animal'),
+        label: Text(l10n.sellAnimal),
         backgroundColor: AppTheme.primaryGreen,
       ),
     );
   }
 }
 
-// ─── Category Tile ────────────────────────────────────────────────────────────
 class _CategoryTile extends StatelessWidget {
   final String emoji;
   final String label;
@@ -388,7 +368,6 @@ class _CategoryTile extends StatelessWidget {
   }
 }
 
-// ─── Listing Card ─────────────────────────────────────────────────────────────
 class _ListingCard extends StatelessWidget {
   final Map<String, dynamic> listing;
   const _ListingCard({required this.listing});
@@ -410,7 +389,6 @@ class _ListingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image ──────────────────────────────────────
             Stack(
               children: [
                 AspectRatio(
@@ -423,20 +401,17 @@ class _ListingCard extends StatelessWidget {
                         )
                       : _placeholder(),
                 ),
-                // Status badge
                 Positioned(
                   top: 10,
                   right: 10,
                   child: _StatusBadge(status: status),
                 ),
-                // Verified badge
                 if (listing['verified'] == true)
                   const Positioned(
                     top: 10,
                     left: 10,
                     child: _VerifiedBadge(),
                   ),
-                // Multiple images indicator
                 if (images.length > 1)
                   Positioned(
                     bottom: 8,
@@ -464,13 +439,11 @@ class _ListingCard extends StatelessWidget {
               ],
             ),
 
-            // ── Details ────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Type + Breed
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -496,7 +469,6 @@ class _ListingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
 
-                  // Age + Weight row
                   Row(
                     children: [
                       _InfoChip(
@@ -518,10 +490,8 @@ class _ListingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Seller + Location row
                   Row(
                     children: [
-                      // Seller avatar + name (tapping opens farmer profile)
                       GestureDetector(
                         onTap: () => context.push(
                           '/farmer/${listing['sellerId']}',
@@ -567,7 +537,6 @@ class _ListingCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      // Location
                       const Icon(Icons.location_on_outlined,
                           size: 12, color: Colors.grey),
                       const SizedBox(width: 2),
@@ -598,7 +567,6 @@ class _ListingCard extends StatelessWidget {
       );
 }
 
-// ─── Small info chip ──────────────────────────────────────────────────────────
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -625,7 +593,6 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});
@@ -660,7 +627,6 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-// ─── Verified Badge ───────────────────────────────────────────────────────────
 class _VerifiedBadge extends StatelessWidget {
   const _VerifiedBadge();
 
@@ -688,7 +654,6 @@ class _VerifiedBadge extends StatelessWidget {
   }
 }
 
-// ─── Filter Bottom Sheet ──────────────────────────────────────────────────────
 class _FilterSheet extends StatefulWidget {
   final String initialType;
   final Function(String type, double? minP, double? maxP, String loc) onApply;
@@ -730,6 +695,7 @@ class _FilterSheetState extends State<_FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.fromLTRB(
           16, 20, 16, MediaQuery.of(context).viewInsets.bottom + 16),
@@ -738,7 +704,6 @@ class _FilterSheetState extends State<_FilterSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 width: 40,
@@ -754,24 +719,23 @@ class _FilterSheetState extends State<_FilterSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Advanced Filters',
-                    style: TextStyle(
+                Text(l10n.advancedFilters,
+                    style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold)),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                     widget.onClear();
                   },
-                  child: const Text('Clear All',
-                      style: TextStyle(color: Colors.red)),
+                  child: Text(l10n.clearAll,
+                      style: const TextStyle(color: Colors.red)),
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // Animal type
-            const Text('Animal Type',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(l10n.animalTypeLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -790,18 +754,17 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Price range
-            const Text('Price Range',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(l10n.priceRange,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(
                 child: TextField(
                   controller: _minPriceCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                      labelText: 'Min price',
-                      border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: l10n.minPrice,
+                      border: const OutlineInputBorder()),
                 ),
               ),
               const Padding(
@@ -811,29 +774,27 @@ class _FilterSheetState extends State<_FilterSheet> {
                 child: TextField(
                   controller: _maxPriceCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                      labelText: 'Max price',
-                      border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: l10n.maxPrice,
+                      border: const OutlineInputBorder()),
                 ),
               ),
             ]),
             const SizedBox(height: 16),
 
-            // Location
-            const Text('Farm Location',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(l10n.farmLocationLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _locationCtrl,
-              decoration: const InputDecoration(
-                hintText: 'e.g. Kumasi, Accra…',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.location_on_outlined),
+              decoration: InputDecoration(
+                hintText: l10n.locationHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.location_on_outlined),
               ),
             ),
             const SizedBox(height: 20),
 
-            // Apply button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -856,8 +817,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Apply Filters',
-                    style: TextStyle(
+                child: Text(l10n.applyFilters,
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold)),
