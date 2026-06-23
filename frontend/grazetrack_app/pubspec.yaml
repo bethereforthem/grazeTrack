@@ -44,8 +44,12 @@ dependencies:
   # Open phone dialer, email, browser — used for "Call Farmer" button
   url_launcher: ^6.2.0
 
-  # Date and number formatting
-  intl: ^0.18.0
+  # Internationalization — translations for English, French, Kinyarwanda
+  flutter_localizations:
+    sdk: flutter
+
+  # Date and number formatting (also used by flutter gen-l10n)
+  intl: ^0.20.2
 
   # PDF generation and printing/sharing
   pdf: ^3.10.8
@@ -72,5 +76,6 @@ flutter_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/icons/
