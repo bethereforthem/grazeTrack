@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class HelpFaqScreen extends StatefulWidget {
   const HelpFaqScreen({super.key});
@@ -59,7 +60,7 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
         ),
         _FaqItem(
           q: 'What animal categories can I select for feeding?',
-          a: 'You can select from: Cow, Goat, Sheep, Pig, Chicken, Horse, Camel, or Other. This lets you record feeding by group instead of individual animals.',
+          a: 'You can select from: Cow, Goat, Sheep, Pig, Chicken, Horse, Camel, or Other.',
         ),
         _FaqItem(
           q: 'How do I track total feed costs?',
@@ -73,11 +74,11 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
       items: [
         _FaqItem(
           q: 'How do I log a vaccination or treatment?',
-          a: 'Go to Health in the menu (accessible from Dashboard quick actions or the Settings area). Tap Add Health Record, select the animal, choose the type (Vaccination, Treatment, etc.), fill in the details, and save.',
+          a: 'Go to Health in the menu. Tap Add Health Record, select the animal, choose the type (Vaccination, Treatment, etc.), fill in the details, and save.',
         ),
         _FaqItem(
           q: 'How do I get reminders for upcoming vaccinations?',
-          a: 'When you add a health record with a next checkup date, GrazeTrack automatically creates a reminder. You will see it in Notifications when the date approaches.',
+          a: 'When you add a health record with a next checkup date, GrazeTrack automatically creates a reminder visible in Notifications.',
         ),
         _FaqItem(
           q: 'What health record types are available?',
@@ -91,19 +92,19 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
       items: [
         _FaqItem(
           q: 'How do I list an animal for sale?',
-          a: 'Go to Dashboard → Sell Animal, or tap My Listings → Create Listing. Fill in the animal details, price, location, and upload photos. Once published, other farmers can see and buy your listing.',
+          a: 'Go to Dashboard → Sell Animal, or tap My Listings → Create Listing. Fill in the animal details, price, location, and upload photos.',
         ),
         _FaqItem(
           q: 'How do I buy an animal from the marketplace?',
-          a: 'Browse the Marketplace tab, tap a listing you are interested in, and tap "Place Order". Choose your payment method and confirm the order.',
+          a: 'Browse the Marketplace tab, tap a listing, and tap "Place Order". Choose your payment method and confirm.',
         ),
         _FaqItem(
           q: 'How do I contact a seller?',
-          a: 'On any listing detail page, tap the "Message Seller" button. This opens a direct chat with the seller.',
+          a: 'On any listing detail page, tap the "Message Seller" button to open a direct chat.',
         ),
         _FaqItem(
           q: 'How do I track my orders?',
-          a: 'Go to Dashboard → My Orders to see all your purchases. You can view the status (Pending, Confirmed, Shipped, Delivered) and order details.',
+          a: 'Go to Dashboard → My Orders to see all your purchases and their status.',
         ),
       ],
     ),
@@ -113,15 +114,15 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
       items: [
         _FaqItem(
           q: 'How do I start a conversation with another farmer?',
-          a: 'Go to the Messages tab (chat bubble icon in the bottom nav). Tap the Farmers tab, then tap "Find Farmers to Chat". Search the list and tap the chat icon next to a farmer\'s name.',
+          a: 'Go to the Messages tab, tap the Farmers tab, then tap "Find Farmers to Chat". Search the list and tap the chat icon next to a farmer\'s name.',
         ),
         _FaqItem(
           q: 'Where can I see my conversations?',
-          a: 'The Messages tab has two sections: Chats (all your conversations sorted by most recent) and Farmers (farmers you have already communicated with).',
+          a: 'The Messages tab has two sections: Chats (all conversations) and Farmers (farmers you have communicated with).',
         ),
         _FaqItem(
           q: 'Will I be notified of new messages?',
-          a: 'Yes. You will receive a push notification when a new message arrives. Make sure you have allowed notifications for GrazeTrack in your phone settings.',
+          a: 'Yes. You will receive a push notification when a new message arrives.',
         ),
       ],
     ),
@@ -131,11 +132,11 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
       items: [
         _FaqItem(
           q: 'How do I view my farm\'s financial report?',
-          a: 'Tap Reports in the bottom navigation bar. You will see total revenue, expenses, profit, and charts for the current month and all time.',
+          a: 'Tap Reports in the bottom navigation bar to see total revenue, expenses, profit, and charts.',
         ),
         _FaqItem(
           q: 'How do I change the currency?',
-          a: 'Go to Settings → Display Currency. Choose your preferred currency from the list. All amounts will be converted and displayed in that currency.',
+          a: 'Go to Settings → Display Currency. Choose your preferred currency from the list.',
         ),
         _FaqItem(
           q: 'How are profits calculated?',
@@ -149,15 +150,15 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
       items: [
         _FaqItem(
           q: 'How do I update my profile?',
-          a: 'Go to Settings → My Profile. You can update your name, phone number, and profile photo.',
+          a: 'Go to Settings → My Profile. You can update your name and phone number.',
         ),
         _FaqItem(
           q: 'Is my farm data private?',
-          a: 'Yes. Your animal records, health logs, expenses, and sales data are private and only visible to you (and Admins of your organization). Only listings you publish to the marketplace are visible to other users.',
+          a: 'Yes. Your animal records, health logs, expenses, and sales data are private and only visible to you.',
         ),
         _FaqItem(
           q: 'How do I delete my account?',
-          a: 'Contact our support team at support@grazetrack.com and request account deletion. We will process it within 7 business days.',
+          a: 'Contact our support team at support@grazetrack.com and request account deletion.',
         ),
       ],
     ),
@@ -188,20 +189,20 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final sections = _filtered;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Help & FAQ')),
+      appBar: AppBar(title: Text(l10n.helpFaqTitle)),
       body: Column(
         children: [
-          // ── Search bar ──────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _query = v.trim()),
               decoration: InputDecoration(
-                hintText: 'Search help topics…',
+                hintText: l10n.searchFaq,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _query.isNotEmpty
                     ? IconButton(
@@ -222,7 +223,6 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
             ),
           ),
 
-          // ── Content ─────────────────────────────────────────────────
           Expanded(
             child: sections.isEmpty
                 ? Center(
@@ -251,7 +251,6 @@ class _HelpFaqScreenState extends State<HelpFaqScreen> {
   }
 }
 
-// ─── Section widget ────────────────────────────────────────────────────────────
 class _SectionWidget extends StatelessWidget {
   final _FaqSection section;
   const _SectionWidget({required this.section});
@@ -279,7 +278,6 @@ class _SectionWidget extends StatelessWidget {
   }
 }
 
-// ─── Expandable FAQ tile ───────────────────────────────────────────────────────
 class _FaqTile extends StatefulWidget {
   final _FaqItem item;
   const _FaqTile({required this.item});
@@ -331,7 +329,6 @@ class _FaqTileState extends State<_FaqTile> {
   }
 }
 
-// ─── Data models (compile-time constants) ────────────────────────────────────
 class _FaqSection {
   final String title;
   final IconData icon;
