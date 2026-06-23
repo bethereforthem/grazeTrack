@@ -4,6 +4,7 @@ import '../notification_provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -55,18 +56,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(notificationProvider);
+    final l10n = AppLocalizations.of(context);
     final unread = state.unreadCount;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notifications),
         actions: [
           if (unread > 0)
             TextButton(
               onPressed: () =>
                   ref.read(notificationProvider.notifier).markAllRead(),
-              child: const Text('Mark all read',
-                  style: TextStyle(color: Colors.white, fontSize: 13)),
+              child: Text(l10n.markAllRead,
+                  style: const TextStyle(color: Colors.white, fontSize: 13)),
             ),
         ],
         bottom: TabBar(
@@ -79,7 +81,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Alerts'),
+                  Text(l10n.alertsTab),
                   if (unread > 0) ...[
                     const SizedBox(width: 6),
                     Badge(
@@ -90,16 +92,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 ],
               ),
             ),
-            const Tab(text: 'Reminders'),
+            Tab(text: l10n.remindersTab),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabs,
         children: [
-          // ── Tab 1: System Notifications ────────────────────────────
           _AlertsTab(state: state),
-          // ── Tab 2: Upcoming Health Reminders ───────────────────────
           _RemindersTab(
             upcoming: _upcoming,
             isLoading: _upcomingLoading,
@@ -111,29 +111,31 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   }
 }
 
-// ─── Alerts tab: system notifications from backend ───────────────────────────
 class _AlertsTab extends ConsumerWidget {
   final NotificationState state;
   const _AlertsTab({required this.state});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (state.notifications.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.notifications_none, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No notifications yet',
-                style: TextStyle(fontSize: 17, color: Colors.grey)),
-            SizedBox(height: 6),
-            Text('You\'ll see alerts for messages and orders here',
-                style: TextStyle(fontSize: 13, color: Colors.grey)),
+            const Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(l10n.noNotifications,
+                style: const TextStyle(fontSize: 17, color: Colors.grey)),
+            const SizedBox(height: 6),
+            Text(l10n.alertsSubtitle,
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                textAlign: TextAlign.center),
           ],
         ),
       );
@@ -271,7 +273,6 @@ class _AlertsTab extends ConsumerWidget {
   }
 }
 
-// ─── Reminders tab: upcoming health checks ───────────────────────────────────
 class _RemindersTab extends StatelessWidget {
   final List<Map<String, dynamic>> upcoming;
   final bool isLoading;
@@ -285,22 +286,25 @@ class _RemindersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (upcoming.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
-            SizedBox(height: 16),
-            Text('All up to date!',
-                style: TextStyle(fontSize: 17, color: Colors.grey)),
-            SizedBox(height: 6),
-            Text('No upcoming vaccinations or checkups',
-                style: TextStyle(fontSize: 13, color: Colors.grey)),
+            const Icon(Icons.check_circle_outline,
+                size: 64, color: Colors.green),
+            const SizedBox(height: 16),
+            Text(l10n.allUpToDate,
+                style: const TextStyle(fontSize: 17, color: Colors.grey)),
+            const SizedBox(height: 6),
+            Text(l10n.noUpcomingHealthChecks,
+                style: const TextStyle(fontSize: 13, color: Colors.grey)),
           ],
         ),
       );
@@ -338,8 +342,8 @@ class _RemindersTab extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                'Due: ${AppUtils.formatDate(date)}'
-                '${daysUntil >= 0 ? '  ($daysUntil days away)' : '  (overdue)'}',
+                '${l10n.dueLabel}: ${AppUtils.formatDate(date)}'
+                '${daysUntil >= 0 ? '  (${l10n.daysAway(daysUntil)})' : '  (${l10n.overdue})'}',
                 style: TextStyle(
                     color: isUrgent
                         ? AppTheme.warningOrange
